@@ -45,3 +45,10 @@ to report Bundler-installed gem executables if available.
 
 2. If you wish to disable the plugin, type `rbenv bundler off`. Type `rbenv
    bundler on` to enable.
+
+### Version History
+
+**0.90** (September 28, 2011)
+
+* Update plugin scripts to use the RBENV_DIR environment variable.
+* Start release tagging.

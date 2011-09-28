@@ -52,9 +52,7 @@ function get_bundle_path {
 
 # The local, per-project rbenv directory.
 if [[ "$(rbenv-version-name)" != "system" ]]; then
-    local_dir=$(dirname -- "$(rbenv-version-file)")
-else
-    local_dir=$PWD
+    RBENV_DIR=$(dirname -- "$(rbenv-version-file)")
 fi
 
 # The plugins root directory.
