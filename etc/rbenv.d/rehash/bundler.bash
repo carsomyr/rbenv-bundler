@@ -66,7 +66,7 @@ if [[ "${BASH_SOURCE[0]}" != "${BASH_SOURCE[1]}" ]]; then
     for cached_dir in "${cached_dirs[@]}"; do
 
         if [[ ! -d "$cached_dir" ]]; then
-            return
+            continue
         fi
 
         unset -- CACHED_DIR_OK
