@@ -90,7 +90,7 @@ else
 
     cd -- "$SHIM_PATH" \
         && shopt -s -- nullglob \
-        && make_shims "$bundle_path"/ruby/*/bin/* \
+        && make_shims "$bundle_path"/ruby/*/bin/* "$bundle_path"/bin/* \
         ; shopt -u -- nullglob \
         ; cd -- "$RBENV_DIR"
 
