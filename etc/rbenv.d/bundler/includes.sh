@@ -37,7 +37,7 @@ function get_bundle_path {
         return 1
     fi
 
-    local -- bundle_path=$(cat -- "$bundle_config" | sed -En -- "s/^BUNDLE_PATH: (.*)\$/\\1/gp")
+    local -- bundle_path=$(cat -- "$bundle_config" "$HOME/.bundle/config" 2>/dev/null | sed -En -- "s/^BUNDLE_PATH: (.*)\$/\\1/gp" | head -n 1)
 
     if [[ -n "${bundle_path%%/*}" ]]; then
         bundle_path="${1}/${bundle_path}"
