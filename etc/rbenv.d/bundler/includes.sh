@@ -28,7 +28,8 @@
 
 # Contains includes common to rbenv-bundler plugin scripts.
 
-# Gets the bundle installation path by inspecting the ".bundle/config" file.
+# Gets the bundle installation path by inspecting the ".bundle/config" file
+# and also the ~/.bundle/config file, if present.
 function get_bundle_path {
 
     local -- bundle_config="${1}/.bundle/config"
@@ -49,6 +50,30 @@ function get_bundle_path {
     fi
 
     echo "$bundle_path"
+}
+
+# Given a bundle path (i.e. one returned by get_bundle_path) and
+# the name of a binary (e.g. "rails"), return the path to that binary,
+# if it is present. Depending on how the bundle was created by bundler,
+# the binary may be in one of two locations:
+# 
+# 1. ruby/*/bin/rails
+# 2. bin/rails
+#
+function find_bundled_executable {
+
+  local -- bundle_path=$1
+  local -- binary_name=$2
+  
+  shopt -s -- nullglob \
+      && bundled_executables=("$bundle_path"/ruby/*/bin/"$binary_name") \
+      ; shopt -u -- nullglob
+
+  if (( ${#bundled_executables[@]} > 0 )); then
+      echo ${bundled_executables[0]}
+  elif [[ -x "$bundle_path"/bin/"$binary_name" ]]; then
+      echo "$bundle_path"/bin/"$binary_name"
+  fi
 }
 
 # The local, per-project rbenv directory.

@@ -34,17 +34,15 @@ if [[ -n "$plugin_disabled" ]] || { ! bundle_path=$(get_bundle_path "$RBENV_DIR"
     return
 fi
 
-shopt -s -- nullglob \
-    && bundled_executables=("$bundle_path"/ruby/*/bin/"$RBENV_COMMAND") \
-    ; shopt -u -- nullglob
+bundled_executable=$(find_bundled_executable $bundle_path $RBENV_COMMAND)
 
-if (( ${#bundled_executables[@]} == 0 )); then
+if [[ ! $bundled_executable ]]; then
     return
 fi
 
 # Instead of running "$RBENV_COMMAND", run "bundle exec ${RBENV_COMMAND}" instead.
 
-RBENV_BIN_PATH=$(dirname -- "${bundled_executables[0]}")
+RBENV_BIN_PATH=$(dirname -- "$bundled_executable")
 RBENV_COMMAND="bundle"
 RBENV_COMMAND_PATH=$(which env)
 
