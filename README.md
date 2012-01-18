@@ -48,6 +48,14 @@ to report Bundler-installed gem executables if available.
 
 ### Version History
 
+**0.91** (January 18, 2012)
+
+* The plugin now scans `~/.bundle/config` in addition to, and as a fallback for,
+  the project-local Bundler configuration file. Credit
+  [@mbrictson](https://github.com/mbrictson).
+* Fixed issue #6, where nonexistent directories would cause the rehash mechanism
+  to return prematurely. Credit [@mbrictson](https://github.com/mbrictson).
+
 **0.90** (September 28, 2011)
 
 * Updated plugin scripts to use the RBENV_DIR environment variable.
