@@ -34,65 +34,40 @@ if [[ -n "$plugin_disabled" ]]; then
     return
 fi
 
-if [[ "${BASH_SOURCE[0]}" != "${BASH_SOURCE[1]}" ]]; then
+manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
+rehash_rb_script="${plugin_root_dir}/etc/rbenv.d/bundler/rehash.rb"
 
-    # Read the cached bundle installation paths into an array.
+mkdir -p -- "$manifest_dir"
+touch -- "${manifest_dir}/manifest"
 
-    cached_dirs_file="${plugin_root_dir}/share/rbenv/bundler/paths"
+"$rehash_rb_script" --refresh --verbose --out-dir "$manifest_dir" -- "$PWD"
 
-    if [[ ! -f "$cached_dirs_file" ]]; then
+manifest_entries=$(cat -- "${manifest_dir}/manifest")
 
-        mkdir -p -- "$(dirname -- "$cached_dirs_file")"
-        touch -- "$cached_dirs_file"
-    fi
+ifs_save=$IFS
 
-    cached_dirs="$(cat -- "$cached_dirs_file")"$'\n'
+IFS=$'\n'
+manifest_entries=($manifest_entries)
+IFS=$ifs_save
 
-    if { get_bundle_path "$RBENV_DIR" > /dev/null; } then
-        cached_dirs="${cached_dirs}${RBENV_DIR}"$'\n'
-    fi
+for (( i = 0; i < ${#manifest_entries[@]}; i += 2 )); do
 
-    cached_dirs=$(echo -n "$cached_dirs" | sort -u)
+    gemspec_entries=$(cat -- "${manifest_dir}/${manifest_entries[$(($i + 1))]}")
 
     ifs_save=$IFS
 
     IFS=$'\n'
-    cached_dirs=($cached_dirs)
+    gemspec_entries=($gemspec_entries)
     IFS=$ifs_save
 
-    acc=""
+    for (( j = 0; j < ${#gemspec_entries[@]}; j += 2 )); do
 
-    # As part of the for loop, this script sources itself to process each bundle installation path in turn.
-    for cached_dir in "${cached_dirs[@]}"; do
+        gem_executable="${gemspec_entries[$(($j + 1))]}/${gemspec_entries[$j]}"
 
-        if [[ ! -d "$cached_dir" ]]; then
+        if [[ ! -f "$gem_executable" ]]; then
             continue
         fi
 
-        unset -- cached_dir_ok
-
-        cd -- "$cached_dir" \
-            && RBENV_DIR=$PWD source -- "${BASH_SOURCE[0]}" \
-            ; cd -- "$RBENV_DIR" \
-
-        if [[ -n "CACHED_DIR_OK" ]]; then
-            acc="${acc}${cached_dir}"$'\n'
-        fi
+        cd -- "$SHIM_PATH" && make_shims "$gem_executable"; cd -- "$PWD"
     done
-
-    echo -n "$acc" > "$cached_dirs_file"
-
-else
-
-    if { ! bundle_path=$(get_bundle_path "$RBENV_DIR"); } then
-        return
-    fi
-
-    cd -- "$SHIM_PATH" \
-        && shopt -s -- nullglob \
-        && make_shims "$bundle_path"/ruby/*/bin/* "$bundle_path"/bin/* \
-        ; shopt -u -- nullglob \
-        ; cd -- "$RBENV_DIR"
-
-    cached_dir_ok="1"
-fi
+done

@@ -30,11 +30,11 @@
 
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 
-if [[ -n "$plugin_disabled" ]] || { ! bundle_path=$(get_bundle_path "$RBENV_DIR"); } then
+if [[ -n "$plugin_disabled" ]]; then
     return
 fi
 
-if { ! bundled_executable=$(find_bundled_executable "$bundle_path" "$RBENV_COMMAND"); } then
+if { ! bundled_executable=$(find_bundled_executable); } then
     return
 fi
 
@@ -42,7 +42,7 @@ fi
 
 RBENV_BIN_PATH=$(dirname -- "$bundled_executable")
 RBENV_COMMAND="bundle"
-RBENV_COMMAND_PATH=$(which env)
+RBENV_COMMAND_PATH=$(rbenv-which "$RBENV_COMMAND")
 
 # The first argument is ignored by later processing.
-set -- "-" "--" "RBENV_DIR=." "bundle" "exec" "$@"
+set -- "-" "exec" "$@"

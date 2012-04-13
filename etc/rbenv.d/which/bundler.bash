@@ -30,11 +30,11 @@
 
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 
-if [[ -n "$plugin_disabled" ]] || { ! bundle_path=$(get_bundle_path "$RBENV_DIR"); } then
+if [[ -n "$plugin_disabled" ]]; then
     return
 fi
 
-if { ! bundled_executable=$(find_bundled_executable "$bundle_path" "$RBENV_COMMAND"); } then
+if { ! bundled_executable=$(find_bundled_executable); } then
     return
 fi
 
