@@ -16,6 +16,12 @@ to report Bundler-installed gem executables if available.
         $ git clone -- git@github.com:carsomyr/rbenv-bundler \
           ~/.rbenv/plugins/bundler
 
+3. Make sure that there is a reasonably up-to-date system Ruby (1.8 or 1.9) with
+   the Bundler gem installed, available for the plugin's use.
+
+        $ ruby -r bundler -e "puts RUBY_VERSION"
+          1.9.3
+
 ### Usage
 
 1. Just as you would run `rbenv rehash` upon installation of a new Ruby
@@ -23,8 +29,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 1.8.7-p352.
-        $ rbenv local 1.8.7-p352
+        $ # Suppose the project uses Ruby version 1.9.3-p125.
+        $ rbenv local 1.9.3-p125
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
@@ -47,6 +53,15 @@ to report Bundler-installed gem executables if available.
    bundler on` to enable.
 
 ### Version History
+
+**0.92** (April 14, 2012)
+
+* Fix issue #12, where setups without `--path` specified would sometimes pick
+  gem executables with incorrect versions. As a result of reconciling different
+  use cases, the plugin has been rearchitected to use a helper script,
+  `rehash.rb`, to explore Bundler-controlled directories and create a gemspec
+  manifest for each project. That way, a gem executable satisfying Gemfile
+  version constraints can be picked every time.
 
 **0.91** (January 18, 2012)
 
