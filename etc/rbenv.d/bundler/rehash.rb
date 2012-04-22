@@ -30,6 +30,7 @@
 require "bundler"
 require "logger"
 require "optparse"
+require "ostruct"
 require "pathname"
 
 # Contains class methods that support rbenv-bundler's rehash hook.
@@ -101,12 +102,35 @@ class RbenvBundler
                                    Bundler::Definition.build(bundler_gemfile, bundler_lockfile, nil))
 
     begin
-      runtime.specs
-    rescue Bundler::GemNotFound => e
-      logger.warn("Bundler gave the error \"#{e.message.gsub("\"", "\\\"")}\"" \
-        " while processing #{bundler_gemfile.to_s.gsub("\"", "\\\"")}." \
-        " Perhaps you forgot to run \"bundle install\"?")
-      []
+      # We need to fork here: Bundler may load .gemspec files that irreversibly modify the Ruby state.
+      child_in, child_out = IO.pipe
+
+      if pid = Process.fork
+        child_out.close
+        gemspecs = YAML::load(child_in)
+        child_in.close
+
+        Process.waitpid2(pid)
+
+        gemspecs
+      else
+        child_in.close
+
+        begin
+          gemspecs = runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
+                                                                  :executables => gemspec.executables) }
+        rescue Bundler::GemNotFound => e
+          logger.warn("Bundler gave the error \"#{e.message.gsub("\"", "\\\"")}\"" \
+            " while processing #{bundler_gemfile.to_s.gsub("\"", "\\\"")}." \
+            " Perhaps you forgot to run \"bundle install\"?")
+          gemspecs = []
+        end
+
+        YAML::dump(gemspecs, child_out)
+        child_out.close
+
+        exit!
+      end
     ensure
       # Restore old environment variables for later reuse.
       ENV["BUNDLE_GEMFILE"] = old_bundle_gemfile
