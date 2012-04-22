@@ -29,8 +29,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 1.9.3-p125.
-        $ rbenv local 1.9.3-p125
+        $ # Suppose the project uses Ruby version 1.9.3-p194.
+        $ rbenv local 1.9.3-p194
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
@@ -56,20 +56,28 @@ to report Bundler-installed gem executables if available.
 
 **0.92** (April 14, 2012)
 
-* Fix issue #12, where setups without `--path` specified would sometimes pick
-  gem executables with incorrect versions. As a result of reconciling different
-  use cases, the plugin has been rearchitected to use a helper script,
-  `rehash.rb`, to explore Bundler-controlled directories and create a gemspec
-  manifest for each project. That way, a gem executable satisfying Gemfile
-  version constraints can be picked every time.
+* Fix issue [#14](https://github.com/carsomyr/rbenv-bundler/issues/14), where
+  Git-based dependencies would not resolve correctly with the `rehash.rb`
+  script. When using a Git repository as a dependency, Bundler loads its
+  .gemspec file, which in turn may modify the Ruby state arbitrarily in ways
+  that aren't readily reversible. To sidestep such behavior, the plugin now
+  forks a child process for making sensitive Bundler calls.
+* Fix issue [#12](https://github.com/carsomyr/rbenv-bundler/issues/12), where
+  setups without `--path` specified would sometimes pick gem executables with
+  incorrect versions. As a result of reconciling different use cases, the plugin
+  has been rearchitected to use a helper script, `rehash.rb`, to explore
+  Bundler-controlled directories and create a gemspec manifest for each project.
+  That way, a gem executable satisfying Gemfile version constraints can be
+  picked every time.
 
 **0.91** (January 18, 2012)
 
 * The plugin now scans `~/.bundle/config` in addition to, and as a fallback for,
   the project-local Bundler configuration file. Credit
   [@mbrictson](https://github.com/mbrictson).
-* Fix issue #6, where nonexistent directories would cause the rehash mechanism
-  to return prematurely. Credit [@mbrictson](https://github.com/mbrictson).
+* Fix issue [#6](https://github.com/carsomyr/rbenv-bundler/issues/6), where
+  nonexistent directories would cause the rehash mechanism to return
+  prematurely. Credit [@mbrictson](https://github.com/mbrictson).
 
 **0.90** (September 28, 2011)
 
