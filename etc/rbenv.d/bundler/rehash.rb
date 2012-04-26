@@ -27,6 +27,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require "rubygems" unless RUBY_VERSION >= "1.9"
 require "bundler"
 require "logger"
 require "optparse"
@@ -117,7 +118,7 @@ class RbenvBundler
         child_in.close
 
         begin
-          gemspecs = runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
+          gemspecs = runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.respond_to?(:bin_dir) ? gemspec.bin_dir : gemspec.bindir,
                                                                   :executables => gemspec.executables) }
         rescue Bundler::GemNotFound => e
           logger.warn("Bundler gave the error \"#{e.message.gsub("\"", "\\\"")}\"" \
@@ -214,7 +215,7 @@ class RbenvBundler
           # If the Ruby is the system Ruby, we'll ask the system RubyGems for its "gemdir" property.
           child_env = ENV.to_hash
           child_env.delete("PWD")
-          child_env.delete("RBENV_DIR")
+          Child_env.delete("RBENV_DIR")
           child_env.delete("RBENV_HOOK_PATH")
           child_env.delete("RBENV_ROOT")
 
@@ -223,9 +224,13 @@ class RbenvBundler
           child_env["PATH"] = child_env["PATH"] \
             .gsub(Regexp.new("^#{Regexp.escape(ENV["RBENV_ROOT"])}/versions/.+?/bin:"), "")
 
-          gem_dir = Pathname.new(IO.popen([child_env, "gem", "environment", "gemdir",
-                                           :chdir => dir,
-                                           :unsetenv_others => true]) { |child_out| child_out.read.chomp("\n") })
+          if RUBY_VERSION >= "1.9"
+            gem_dir = Pathname.new(IO.popen([child_env, "gem", "environment", "gemdir"], :chdir => dir, :unsetenv_others => true) { |out| out.read.chomp("\n") })
+          else
+            child_env_string = child_env.to_a.map { |pair| "#{pair.first}=#{pair.last}" }
+            gem_dir_command = "cd #{dir} && /usr/bin/env #{child_env_string} gem environment gemdir"
+            gem_dir = Pathname.new(IO.popen(gem_dir_command) { |out| out.read.chomp("\n") })
+          end
         end
 
         gemspec_manifest = Pathname.new(dir.to_s.gsub(Regexp.new("/"), "_"))
