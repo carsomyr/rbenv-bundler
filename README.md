@@ -36,7 +36,7 @@ to report Bundler-installed gem executables if available.
         $ gem install bundler
 
         $ # Suppose you already have a Gemfile.
-        $ bundle install --path vendor/local
+        $ bundle install --path vendor/bundle
 
         $ # Don't forget to rehash!
         $ rbenv rehash

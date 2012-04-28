@@ -28,6 +28,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require "bundler"
+require "digest/md5"
 require "logger"
 require "optparse"
 require "ostruct"
@@ -117,14 +118,16 @@ class RbenvBundler
         child_in.close
 
         begin
-          gemspecs = runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
-                                                                  :executables => gemspec.executables) }
+          gemspecs = runtime.specs
         rescue Bundler::GemNotFound => e
           logger.warn("Bundler gave the error \"#{e.message.gsub("\"", "\\\"")}\"" \
-            " while processing #{bundler_gemfile.to_s.gsub("\"", "\\\"")}." \
+            " while processing \"#{bundler_gemfile.to_s.gsub("\"", "\\\"")}\"." \
             " Perhaps you forgot to run \"bundle install\"?")
           gemspecs = []
         end
+
+        gemspecs = gemspecs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
+                                                           :executables => gemspec.executables) }
 
         YAML::dump(gemspecs, child_out)
         child_out.close
@@ -165,7 +168,7 @@ class RbenvBundler
   #
   # @param [Pathname] dir the directory to start searching from.
   #
-  # @return [String] the rbenv Ruby version, or "system" if an rbenv-based Ruby could not be found.
+  # @return [String] the rbenv Ruby version, or "system" if an rbenv Ruby could not be found.
   def self.rbenv_version(dir = Pathname.new("."))
     dir = dir.expand_path
 
@@ -185,7 +188,7 @@ class RbenvBundler
     "system"
   end
 
-  # Rehashes the given Bundler-controlled directories and build a manifest from them, so that the Bash side of
+  # Rehashes the given Bundler-controlled directories and builds a manifest from them, so that the Bash side of
   # rbenv-bundler can use it to answer "rbenv which" queries.
   #
   # @param [Hash] manifest_map the Hash from Bundler-controlled directories to gemspec manifests.
@@ -193,7 +196,7 @@ class RbenvBundler
   def self.rehash(manifest_map, out_dir = Pathname.new("."))
     raise "The output directory does not exist" if !out_dir.exist?
 
-    Pathname.new("manifest").expand_path(out_dir).open("w") do |f|
+    Pathname.new("manifest.txt").expand_path(out_dir).open("w") do |f|
       manifest_map.each do |dir, gemspec_manifest|
         gemfile = gemfile(dir)
         gemspec_manifest.expand_path(out_dir).delete if gemspec_manifest
@@ -218,17 +221,15 @@ class RbenvBundler
           child_env.delete("RBENV_HOOK_PATH")
           child_env.delete("RBENV_ROOT")
 
-          # Potentially excise an rbenv-based Ruby's bin directory from PATH to ensure that we execute the system "gem"
-          # command.
-          child_env["PATH"] = child_env["PATH"] \
-            .gsub(Regexp.new("^#{Regexp.escape(ENV["RBENV_ROOT"])}/versions/.+?/bin:"), "")
+          # Pop off the first bin directory, which contains the script Ruby.
+          child_env["PATH"] = child_env["PATH"].split(":", -1)[1..-1].join(":")
 
           gem_dir = Pathname.new(IO.popen([child_env, "gem", "environment", "gemdir",
                                            :chdir => dir,
                                            :unsetenv_others => true]) { |child_out| child_out.read.chomp("\n") })
         end
 
-        gemspec_manifest = Pathname.new(dir.to_s.gsub(Regexp.new("/"), "_"))
+        gemspec_manifest = Pathname.new("#{Digest::MD5.hexdigest(dir.to_s)}.txt")
 
         f.write(dir.to_s + "\n")
         f.write(gemspec_manifest.to_s + "\n")
@@ -252,11 +253,11 @@ class RbenvBundler
 
   # Reads in the current manifest if it exists.
   #
-  # @param [Pathname] out_dir the output directory where the current manifest might reside.
+  # @param [Pathname] out_dir the output directory where the current manifest file might reside.
   #
   # @return [Hash] a Hash from Bundler-controlled directories to gemspec manifests.
   def self.read_manifest(out_dir = Pathname.new("."))
-    manifest_file = Pathname.new("manifest").expand_path(out_dir)
+    manifest_file = Pathname.new("manifest.txt").expand_path(out_dir)
 
     return {} if !manifest_file.exist?
 
@@ -273,7 +274,7 @@ if __FILE__ == $0
       :verbose => false
   }
 
-  OptionParser.new do |opt_spec|
+  positional_args = OptionParser.new do |opt_spec|
     opt_spec.banner = "usage: #{File.basename(__FILE__)} [<options>] [[--] <dir>...]"
 
     opt_spec.separator ""
@@ -287,14 +288,14 @@ if __FILE__ == $0
       opts[:verbose] = true
     end
 
-    opt_spec.on("-o", "--out-dir OUT_DIR", "output the manifest to this directory") do |out_dir|
+    opt_spec.on("-o", "--out-dir OUT_DIR", "output metadata files to this directory") do |out_dir|
       opts[:out_dir] = Pathname.new(out_dir)
     end
-  end.parse!(ARGV)
+  end.parse(ARGV)
 
   RbenvBundler.logger.level = Logger::WARN if opts[:verbose]
 
-  dirs = ARGV.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }.compact.map { |gemfile| gemfile.parent }
+  dirs = positional_args.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }.compact.map { |gemfile| gemfile.parent }
 
   # Merge in the contents of the current manifest if the "refresh" switch is provided.
   manifest_map = Hash[dirs.zip([nil] * dirs.size)]

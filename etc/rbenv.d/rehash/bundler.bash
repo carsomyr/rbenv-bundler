@@ -38,11 +38,11 @@ manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
 rehash_rb_script="${plugin_root_dir}/etc/rbenv.d/bundler/rehash.rb"
 
 mkdir -p -- "$manifest_dir"
-touch -- "${manifest_dir}/manifest"
+touch -- "${manifest_dir}/manifest.txt"
 
 "$rehash_rb_script" --refresh --verbose --out-dir "$manifest_dir" -- "$PWD"
 
-manifest_entries=$(cat -- "${manifest_dir}/manifest")
+manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
 
 ifs_save=$IFS
 
