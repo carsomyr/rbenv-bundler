@@ -27,6 +27,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+SEMANTIC_RUBY_VERSION = RUBY_VERSION.split(".", -1).map { |s| s.to_i }
+
+# Ruby 1.8 compatibility: Explicitly require RubyGems.
+require "rubygems" if (SEMANTIC_RUBY_VERSION <=> [1, 9]) < 0
 require "bundler"
 require "digest/md5"
 require "logger"
@@ -285,6 +289,8 @@ class RbenvBundler
         YAML::load(f)
       end
     else
+      return {} if (SEMANTIC_RUBY_VERSION <=> [1, 9]) < 0
+
       rbenv_versions = rbenv_version_dirs.map { |rbenv_version_dir| rbenv_version_dir.basename.to_s } + ["system"]
 
       ruby_profile_map = Hash[rbenv_versions.map do |rbenv_version|
@@ -304,7 +310,8 @@ class RbenvBundler
                                     "puts Gem.dir\n" \
                                     "puts Gem.ruby_engine\n" \
                                     "puts Gem::ConfigMap[:ruby_version]\n",
-                                  :unsetenv_others => true]) do |child_out|
+                                  # Ruby 1.8 compatibility: Declare Hashes explicitly when embedded in Array literals.
+                                  {:unsetenv_others => true}]) do |child_out|
           values = child_out.read.split("\n", -1)[0...-1]
           OpenStruct.new(:ruby_version => values[0].split(".", -1).map { |s| s.to_i },
                          :gem_dir => Pathname.new(values[1]),
@@ -316,6 +323,36 @@ class RbenvBundler
       ruby_profiles_file.open("w") do |f|
         YAML::dump(ruby_profile_map, f)
       end
+    end
+  end
+
+  # Ensures that we are running a capable Ruby implementation. If the script Ruby version is inappropriate, the given
+  # Ruby profiles will be searched and, if located, an appropriate one will be Kernel.exec'd.
+  #
+  # @param [Hash] ruby_profile_map a Hash from rbenv version names to Ruby profiles.
+  def self.ensure_capable_ruby(ruby_profile_map)
+    return nil if (SEMANTIC_RUBY_VERSION <=> [1, 9]) >= 0
+
+    # Find all Rubies that are 1.9+ and are not JRuby (no Kernel.fork).
+    rbenv_versions = ruby_profile_map.select do |rbenv_version, ruby_profile|
+      (ruby_profile.ruby_version <=> [1, 9]) >= 0 && ruby_profile.gem_ruby_engine != "jruby"
+    end.to_a.map do |entry|
+      entry[0]
+    end.sort
+
+    if !rbenv_versions.empty?
+      # Ruby 1.8 compatibility: Kernel.exec does not accept a Hash of environment variables.
+      ENV.delete("PWD")
+      ENV.delete("RBENV_DIR")
+      ENV.delete("RBENV_HOOK_PATH")
+      ENV.delete("RBENV_ROOT")
+
+      ENV["PATH"] = ENV["PATH"].split(":", -1)[1..-1].join(":")
+      ENV["RBENV_VERSION"] = rbenv_versions[0]
+
+      exec("rbenv", "exec", "ruby", "--", __FILE__, *ARGV)
+    else
+      raise "Could not locate a Ruby capable of running this script"
     end
   end
 end
@@ -349,6 +386,9 @@ if __FILE__ == $0
   RbenvBundler.logger.level = Logger::WARN if opts[:verbose]
 
   ruby_profile_map = RbenvBundler.build_ruby_profiles(opts[:out_dir])
+
+  # Try to use a modern Ruby so that the rest of the script doesn't crash and burn.
+  RbenvBundler.ensure_capable_ruby(ruby_profile_map)
 
   dirs = positional_args.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }.compact.map { |gemfile| gemfile.parent }
 
