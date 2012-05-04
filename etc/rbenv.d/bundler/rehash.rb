@@ -312,7 +312,12 @@ class RbenvBundler
                                     "puts Gem::ConfigMap[:ruby_version]\n",
                                   # Ruby 1.8 compatibility: Declare Hashes explicitly when embedded in Array literals.
                                   {:unsetenv_others => true}]) do |child_out|
-          values = child_out.read.split("\n", -1)[0...-1]
+          child_out_s = child_out.read
+
+          # If the child's output is empty, the rbenv Ruby is likely nonexistent.
+          next if child_out_s.empty?
+
+          values = child_out_s.split("\n", -1)[0...-1]
           OpenStruct.new(:ruby_version => values[0].split(".", -1).map { |s| s.to_i },
                          :gem_dir => Pathname.new(values[1]),
                          :gem_ruby_engine => values[2],

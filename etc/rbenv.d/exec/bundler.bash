@@ -31,11 +31,11 @@
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 
 if [[ -n "$plugin_disabled" ]]; then
-    return
+    return 0
 fi
 
 if { ! bundled_executable=$(find_bundled_executable); } then
-    return
+    return 0
 fi
 
 # Instead of running "$RBENV_COMMAND", run "bundle exec ${RBENV_COMMAND}" instead.

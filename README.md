@@ -56,6 +56,9 @@ to report Bundler-installed gem executables if available.
 
 **0.93** (May 4, 2012)
 
+* Fix issue [#17](https://github.com/carsomyr/rbenv-bundler/issues/17), where
+  the `rehash.rb` script would attempt to parse empty child process output when
+  building rbenv Ruby profiles. Such situations are now detected and skipped.
 * Mask the return value of the `rehash.rb` script. Change the rehash hook so
   that it doesn't cause the shell to exit prematurely from `-e` being in effect.
 

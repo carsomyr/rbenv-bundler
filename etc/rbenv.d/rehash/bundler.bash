@@ -31,7 +31,7 @@
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 
 if [[ -n "$plugin_disabled" ]]; then
-    return
+    return 0
 fi
 
 manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
