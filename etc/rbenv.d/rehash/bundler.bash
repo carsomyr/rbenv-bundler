@@ -40,7 +40,7 @@ rehash_rb_script="${plugin_root_dir}/etc/rbenv.d/bundler/rehash.rb"
 mkdir -p -- "$manifest_dir"
 touch -- "${manifest_dir}/manifest.txt"
 
-"$rehash_rb_script" --refresh --verbose --out-dir "$manifest_dir" -- "$PWD"
+"$rehash_rb_script" --refresh --verbose --out-dir "$manifest_dir" -- "$PWD" || true
 
 manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
 
