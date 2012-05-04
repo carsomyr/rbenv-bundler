@@ -16,8 +16,8 @@ to report Bundler-installed gem executables if available.
         $ git clone -- git@github.com:carsomyr/rbenv-bundler \
           ~/.rbenv/plugins/bundler
 
-3. Make sure that there is a reasonably up-to-date system Ruby (1.8 or 1.9) with
-   the Bundler gem installed, available for the plugin's use.
+3. Make sure that there is a 1.9+ system or rbenv Ruby with the Bundler gem
+   installed, available for the plugin's use.
 
         $ ruby -r bundler -e "puts RUBY_VERSION"
           1.9.3
@@ -54,8 +54,20 @@ to report Bundler-installed gem executables if available.
 
 ### Version History
 
+**0.93** (May 4, 2012)
+
+* Mask the return value of the `rehash.rb` script. Change the rehash hook so
+  that it doesn't cause the shell to exit prematurely from `-e` being in effect.
+
 **0.92** (April 14, 2012)
 
+* Ensure that a capable Ruby runs the `rehash.rb` script. Change the `rehash.rb`
+  script so that if it detects an inappropriate Ruby version, it will attempt to
+  locate and `Kernel.exec` an appropriate one.
+* Build rbenv Ruby profiles to induce correct Bundler search behavior. With
+  knowledge of each Ruby(Gems) implementation's version information and
+  directory structure, the `rehash.rb` script can configure Bundler to exhibit
+  the correct search behavior in all cases.
 * Fix issue [#14](https://github.com/carsomyr/rbenv-bundler/issues/14), where
   Git-based dependencies would not resolve correctly with the `rehash.rb`
   script. When using a Git repository as a dependency, Bundler loads its
@@ -83,3 +95,32 @@ to report Bundler-installed gem executables if available.
 
 * Update plugin scripts to use the RBENV_DIR environment variable.
 * Start release tagging.
+
+### License
+
+    Copyright (C) 2011-2012 Roy Liu
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+      * Redistributions of source code must retain the above copyright notice,
+        this list of conditions and the following disclaimer.
+      * Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+      * Neither the name of the author nor the names of any contributors may be
+        used to endorse or promote products derived from this software without
+        specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
