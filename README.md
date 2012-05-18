@@ -13,7 +13,7 @@ to report Bundler-installed gem executables if available.
 
 2. Install the plugin.
 
-        $ git clone -- git@github.com:carsomyr/rbenv-bundler \
+        $ git clone -- git://github.com/carsomyr/rbenv-bundler.git \
           ~/.rbenv/plugins/bundler
 
 3. Make sure that there is a 1.9+ system or rbenv Ruby with the Bundler gem
