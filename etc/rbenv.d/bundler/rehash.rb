@@ -281,10 +281,10 @@ class RbenvBundler
   # @return [Hash] a Hash from rbenv version names to Ruby profiles.
   def self.build_ruby_profiles(out_dir = Pathname.new("."))
     ruby_profiles_file = Pathname.new("ruby_profiles.yml").expand_path(out_dir)
-    rbenv_version_dirs = Pathname.new("versions").expand_path(ENV["RBENV_ROOT"]).children
+    rbenv_versions_dir = Pathname.new("versions").expand_path(ENV["RBENV_ROOT"])
+    rbenv_version_dirs = rbenv_versions_dir.children
 
-    if ruby_profiles_file.exist? \
-      && rbenv_version_dirs.select { |rbenv_version_dir| rbenv_version_dir.mtime > ruby_profiles_file.mtime }.empty?
+    if ruby_profiles_file.exist? && rbenv_versions_dir.mtime <= ruby_profiles_file.mtime
       ruby_profiles_file.open("r") do |f|
         YAML::load(f)
       end
@@ -304,26 +304,30 @@ class RbenvBundler
         child_env["PATH"] = child_env["PATH"].split(":", -1)[1..-1].join(":")
         child_env["RBENV_VERSION"] = rbenv_version
 
-        [rbenv_version, IO.popen([child_env, "ruby",
-                                  "-r", "rubygems",
-                                  "-e", "puts RUBY_VERSION\n" \
-                                    "puts Gem.dir\n" \
-                                    "puts Gem.ruby_engine\n" \
-                                    "puts Gem::ConfigMap[:ruby_version]\n",
-                                  # Ruby 1.8 compatibility: Declare Hashes explicitly when embedded in Array literals.
-                                  {:unsetenv_others => true}]) do |child_out|
+        ruby_profile = IO.popen([child_env, "ruby",
+                                 "-r", "rubygems",
+                                 "-e", "puts RUBY_VERSION\n" \
+                                  "puts Gem.dir\n" \
+                                  "puts Gem.ruby_engine\n" \
+                                  "puts Gem::ConfigMap[:ruby_version]\n",
+                                 # Ruby 1.8 compatibility: Declare Hashes explicitly when embedded in Array literals.
+                                 {:unsetenv_others => true}]) do |child_out|
           child_out_s = child_out.read
 
           # If the child's output is empty, the rbenv Ruby is likely nonexistent.
-          next if child_out_s.empty?
+          next nil if child_out_s.empty?
 
           values = child_out_s.split("\n", -1)[0...-1]
           OpenStruct.new(:ruby_version => values[0].split(".", -1).map { |s| s.to_i },
                          :gem_dir => Pathname.new(values[1]),
                          :gem_ruby_engine => values[2],
                          :gem_ruby_version => values[3])
-        end]
-      end]
+        end
+
+        next nil if !ruby_profile
+
+        [rbenv_version, ruby_profile]
+      end.select { |entry| !entry.nil? }]
 
       ruby_profiles_file.open("w") do |f|
         YAML::dump(ruby_profile_map, f)
@@ -341,7 +345,7 @@ class RbenvBundler
     # Find all Rubies that are 1.9+ and are not JRuby (no Kernel.fork).
     rbenv_versions = ruby_profile_map.select do |rbenv_version, ruby_profile|
       (ruby_profile.ruby_version <=> [1, 9]) >= 0 && ruby_profile.gem_ruby_engine != "jruby"
-    end.to_a.map do |entry|
+    end.map do |entry|
       entry[0]
     end.sort
 

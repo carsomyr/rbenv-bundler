@@ -56,6 +56,11 @@ to report Bundler-installed gem executables if available.
 
 **0.93** (May 4, 2012)
 
+* Fix issue [#19](https://github.com/carsomyr/rbenv-bundler/issues/19), where a
+  crash would result from rbenv Ruby profiles not being updated to reflect the
+  removal of a Ruby. The `rehash.rb` script now checks the recency of the
+  `~/.rbenv/versions` directory instead of rbenv Ruby directories to determine
+  if Rubies have been added or removed.
 * Fix issue [#17](https://github.com/carsomyr/rbenv-bundler/issues/17), where
   the `rehash.rb` script would attempt to parse empty child process output when
   building rbenv Ruby profiles. Such situations are now detected and skipped.
