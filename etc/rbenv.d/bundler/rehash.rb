@@ -95,11 +95,11 @@ class RbenvBundler
     bundler_gemfile = Bundler.default_gemfile
     bundler_lockfile = Bundler.default_lockfile
 
-    if bundler_settings[:path]
+    if !bundler_settings[:path].nil?
       # The user specified a bundle path.
       bundle_path = Bundler.bundle_path
 
-      if bundler_settings[:disable_shared_gems]
+      if !bundler_settings[:disable_shared_gems].nil?
         # Shared gems are disabled; search only the bundle path.
         ENV["GEM_HOME"] = bundle_path.to_s
         ENV["GEM_PATH"] = ""
@@ -130,7 +130,9 @@ class RbenvBundler
       # We need to fork here: Bundler may load .gemspec files that irreversibly modify the Ruby state.
       child_in, child_out = IO.pipe
 
-      if pid = Process.fork
+      pid = Process.fork
+
+      if !pid.nil?
         child_out.close
         gemspecs = YAML::load(child_in)
         child_in.close
@@ -223,14 +225,14 @@ class RbenvBundler
     Pathname.new("manifest.txt").expand_path(out_dir).open("w") do |f|
       manifest_map.each do |dir, gemspec_manifest|
         gemfile = gemfile(dir)
-        gemspec_manifest.expand_path(out_dir).delete if gemspec_manifest
+        gemspec_manifest.expand_path(out_dir).delete if !gemspec_manifest.nil?
 
-        next if !gemfile
+        next if gemfile.nil?
 
         dir = gemfile.parent
         ruby_profile = ruby_profile_map[rbenv_version(dir)]
 
-        next if !ruby_profile
+        next if ruby_profile.nil?
 
         # Fake the Ruby implementation to induce correct Bundler search behavior.
         Bundler.ruby_profile = ruby_profile
@@ -324,7 +326,7 @@ class RbenvBundler
                          :gem_ruby_version => values[3])
         end
 
-        next nil if !ruby_profile
+        next nil if ruby_profile.nil?
 
         [rbenv_version, ruby_profile]
       end.select { |entry| !entry.nil? }]
