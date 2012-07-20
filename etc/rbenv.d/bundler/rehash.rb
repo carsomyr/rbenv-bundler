@@ -134,7 +134,7 @@ class RbenvBundler
 
       if !pid.nil?
         child_out.close
-        gemspecs = YAML::load(child_in)
+        gemspecs = YAML.load(child_in) || []
         child_in.close
 
         Process.waitpid2(pid)
@@ -144,19 +144,16 @@ class RbenvBundler
         child_in.close
 
         begin
-          gemspecs = runtime.specs
-        rescue Bundler::GemNotFound => e
+          YAML.dump(runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
+                                                                 :executables => gemspec.executables) }, child_out)
+        rescue Bundler::GemNotFound, Bundler::GitError => e
           logger.warn("Bundler gave the error \"#{e.message.gsub("\"", "\\\"")}\"" \
             " while processing \"#{bundler_gemfile.to_s.gsub("\"", "\\\"")}\"." \
             " Perhaps you forgot to run \"bundle install\"?")
           gemspecs = []
+        ensure
+          child_out.close
         end
-
-        gemspecs = gemspecs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
-                                                           :executables => gemspec.executables) }
-
-        YAML::dump(gemspecs, child_out)
-        child_out.close
 
         exit!
       end
@@ -288,7 +285,7 @@ class RbenvBundler
 
     if ruby_profiles_file.exist? && rbenv_versions_dir.mtime <= ruby_profiles_file.mtime
       ruby_profiles_file.open("r") do |f|
-        YAML::load(f)
+        YAML.load(f)
       end
     else
       return {} if (SEMANTIC_RUBY_VERSION <=> [1, 9]) < 0
@@ -332,7 +329,7 @@ class RbenvBundler
       end.select { |entry| !entry.nil? }]
 
       ruby_profiles_file.open("w") do |f|
-        YAML::dump(ruby_profile_map, f)
+        YAML.dump(ruby_profile_map, f)
       end
     end
   end
