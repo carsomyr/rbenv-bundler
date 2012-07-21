@@ -54,14 +54,20 @@ to report Bundler-installed gem executables if available.
 
 ### Version History
 
+**0.94** (July 21, 2012)
+
+* Fix issue [\#22](https://github.com/carsomyr/rbenv-bundler/issues/22). This
+  addresses the corner cases when either the `manifest.txt` file doesn't exist
+  or the `ruby_profiles.yml` file is first created.
+
 **0.93** (May 4, 2012)
 
-* Fix issue [#19](https://github.com/carsomyr/rbenv-bundler/issues/19), where a
+* Fix issue [\#19](https://github.com/carsomyr/rbenv-bundler/issues/19), where a
   crash would result from rbenv Ruby profiles not being updated to reflect the
   removal of a Ruby. The `rehash.rb` script now checks the recency of the
   `~/.rbenv/versions` directory instead of rbenv Ruby directories to determine
   if Rubies have been added or removed.
-* Fix issue [#17](https://github.com/carsomyr/rbenv-bundler/issues/17), where
+* Fix issue [\#17](https://github.com/carsomyr/rbenv-bundler/issues/17), where
   the `rehash.rb` script would attempt to parse empty child process output when
   building rbenv Ruby profiles. Such situations are now detected and skipped.
 * Mask the return value of the `rehash.rb` script. Change the rehash hook so
@@ -76,13 +82,13 @@ to report Bundler-installed gem executables if available.
   knowledge of each Ruby(Gems) implementation's version information and
   directory structure, the `rehash.rb` script can configure Bundler to exhibit
   the correct search behavior in all cases.
-* Fix issue [#14](https://github.com/carsomyr/rbenv-bundler/issues/14), where
+* Fix issue [\#14](https://github.com/carsomyr/rbenv-bundler/issues/14), where
   Git-based dependencies would not resolve correctly with the `rehash.rb`
   script. When using a Git repository as a dependency, Bundler loads its
   .gemspec file, which in turn may modify the Ruby state arbitrarily in ways
   that aren't readily reversible. To sidestep such behavior, the plugin now
   forks a child process for making sensitive Bundler calls.
-* Fix issue [#12](https://github.com/carsomyr/rbenv-bundler/issues/12), where
+* Fix issue [\#12](https://github.com/carsomyr/rbenv-bundler/issues/12), where
   setups without `--path` specified would sometimes pick gem executables with
   incorrect versions. As a result of reconciling different use cases, the plugin
   has been rearchitected to use a helper script, `rehash.rb`, to explore
@@ -95,7 +101,7 @@ to report Bundler-installed gem executables if available.
 * The plugin now scans `~/.bundle/config` in addition to, and as a fallback for,
   the project-local Bundler configuration file. Credit
   [@mbrictson](https://github.com/mbrictson).
-* Fix issue [#6](https://github.com/carsomyr/rbenv-bundler/issues/6), where
+* Fix issue [\#6](https://github.com/carsomyr/rbenv-bundler/issues/6), where
   nonexistent directories would cause the rehash mechanism to return
   prematurely. Credit [@mbrictson](https://github.com/mbrictson).
 
