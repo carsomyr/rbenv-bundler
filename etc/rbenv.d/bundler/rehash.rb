@@ -331,6 +331,8 @@ class RbenvBundler
       ruby_profiles_file.open("w") do |f|
         YAML.dump(ruby_profile_map, f)
       end
+
+      ruby_profile_map
     end
   end
 

@@ -33,7 +33,13 @@
 function find_bundled_executable {
 
     local -- manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
-    local -- manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
+    local -- manifest_entries
+
+    if [[ -f "${manifest_dir}/manifest.txt" ]]; then
+        manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
+    else
+        manifest_entries=()
+    fi
 
     ifs_save=$IFS
 
