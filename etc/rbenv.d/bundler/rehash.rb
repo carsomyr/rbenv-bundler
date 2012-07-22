@@ -341,7 +341,8 @@ class RbenvBundler
   #
   # @param [Hash] ruby_profile_map a Hash from rbenv version names to Ruby profiles.
   def self.ensure_capable_ruby(ruby_profile_map)
-    return nil if (SEMANTIC_RUBY_VERSION <=> [1, 9]) >= 0
+    # Check if the current Ruby is capable.
+    return nil if (SEMANTIC_RUBY_VERSION <=> [1, 9]) >= 0 && Gem.ruby_engine != "jruby"
 
     # Find all Rubies that are 1.9+ and are not JRuby (no Kernel.fork).
     rbenv_versions = ruby_profile_map.select do |rbenv_version, ruby_profile|

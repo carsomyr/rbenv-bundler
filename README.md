@@ -56,6 +56,9 @@ to report Bundler-installed gem executables if available.
 
 **0.94** (July 21, 2012)
 
+* Fix issue [\#21](https://github.com/carsomyr/rbenv-bundler/issues/21), where
+  the `RbenvBundler#ensure_capable_ruby` method would claim JRuby 1.9.x as
+  capable when it's not (lack of `Kernel.fork`).
 * Fix issue [\#22](https://github.com/carsomyr/rbenv-bundler/issues/22). This
   addresses the corner cases when either the `manifest.txt` file doesn't exist
   or the `ruby_profiles.yml` file is first created.
