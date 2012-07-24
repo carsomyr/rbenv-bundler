@@ -31,11 +31,11 @@
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 
 if [[ -n "$plugin_disabled" ]]; then
-    return 0
+    return -- 0
 fi
 
 if { ! bundled_executable=$(find_bundled_executable); } then
-    return 0
+    return -- 0
 fi
 
 # Yield an executable in the bundle installation path.

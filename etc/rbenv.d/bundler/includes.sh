@@ -70,11 +70,11 @@ function find_bundled_executable {
 
             echo "${gemspec_entries[$(($j + 1))]}/${gemspec_entries[$j]}"
 
-            return 0
+            return -- 0
         done
     done
 
-    return 1
+    return -- 1
 }
 
 # The plugins root directory.

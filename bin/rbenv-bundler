@@ -45,7 +45,7 @@ case "$1" in
 
     *)
         echo "usage: rbenv bundler [on | off]" >&2
-        exit 1
+        exit -- 1
         ;;
 esac
 

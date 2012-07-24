@@ -67,7 +67,7 @@ class RbenvBundler
 
   @logger = Logger.new(STDERR)
   @logger.level = Logger::ERROR
-  @logger.formatter = proc do |severity, datetime, progname, message|
+  @logger.formatter = Proc.new do |_, _, _, message|
     message.chomp("\n") + "\n"
   end
 
@@ -150,7 +150,6 @@ class RbenvBundler
           logger.warn("Bundler gave the error \"#{e.message.gsub("\"", "\\\"")}\"" \
             " while processing \"#{bundler_gemfile.to_s.gsub("\"", "\\\"")}\"." \
             " Perhaps you forgot to run \"bundle install\"?")
-          gemspecs = []
         ensure
           child_out.close
         end
@@ -345,7 +344,7 @@ class RbenvBundler
     return nil if (SEMANTIC_RUBY_VERSION <=> [1, 9]) >= 0 && Gem.ruby_engine != "jruby"
 
     # Find all Rubies that are 1.9+ and are not JRuby (no Kernel.fork).
-    rbenv_versions = ruby_profile_map.select do |rbenv_version, ruby_profile|
+    rbenv_versions = ruby_profile_map.select do |_, ruby_profile|
       (ruby_profile.ruby_version <=> [1, 9]) >= 0 && ruby_profile.gem_ruby_engine != "jruby"
     end.map do |entry|
       entry[0]
