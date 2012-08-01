@@ -219,9 +219,9 @@ class RbenvBundler
     raise "The output directory does not exist" if !out_dir.exist?
 
     Pathname.new("manifest.txt").expand_path(out_dir).open("w") do |f|
-      manifest_map.each do |dir, gemspec_manifest|
+      manifest_map.each do |dir, manifest_file|
         gemfile = gemfile(dir)
-        gemspec_manifest.expand_path(out_dir).delete if !gemspec_manifest.nil?
+        manifest_file.expand_path(out_dir).delete if !manifest_file.nil?
 
         next if gemfile.nil?
 
@@ -233,12 +233,12 @@ class RbenvBundler
         # Fake the Ruby implementation to induce correct Bundler search behavior.
         Bundler.ruby_profile = ruby_profile
 
-        gemspec_manifest = Pathname.new("#{Digest::MD5.hexdigest(dir.to_s)}.txt")
+        manifest_file = Pathname.new("#{Digest::MD5.hexdigest(dir.to_s)}.txt")
 
         f.write(dir.to_s + "\n")
-        f.write(gemspec_manifest.to_s + "\n")
+        f.write(manifest_file.to_s + "\n")
 
-        gemspec_manifest.expand_path(out_dir).open("w") do |f|
+        manifest_file.expand_path(out_dir).open("w") do |f|
           gemspecs(gemfile).each do |gemspec|
             gemspec.executables.each do |executable|
               # We don't rehash the Bundler executable; otherwise, undesirable recursion would result.
@@ -375,7 +375,7 @@ if __FILE__ == $0
   }
 
   positional_args = OptionParser.new do |opt_spec|
-    opt_spec.banner = "usage: #{File.basename(__FILE__)} [<options>] [[--] <dir>...]"
+    opt_spec.banner = "usage: #{Pathname.new(__FILE__).basename} [<options>] [[--] <dir>...]"
 
     opt_spec.separator ""
     opt_spec.separator "optional arguments:"
