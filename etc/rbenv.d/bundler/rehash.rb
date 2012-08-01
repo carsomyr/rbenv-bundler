@@ -147,8 +147,7 @@ class RbenvBundler
           YAML.dump(runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
                                                                  :executables => gemspec.executables) }, child_out)
         rescue Bundler::GemNotFound, Bundler::GitError => e
-          logger.warn("Bundler gave the error \"#{e.message.gsub("\"", "\\\"")}\"" \
-            " while processing \"#{bundler_gemfile.to_s.gsub("\"", "\\\"")}\"." \
+          logger.warn("Bundler gave the error #{e.message.dump} while processing #{bundler_gemfile.to_s.dump}." \
             " Perhaps you forgot to run \"bundle install\"?")
         ensure
           child_out.close
@@ -289,7 +288,7 @@ class RbenvBundler
     else
       return {} if (SEMANTIC_RUBY_VERSION <=> [1, 9]) < 0
 
-      rbenv_versions = rbenv_version_dirs.map { |rbenv_version_dir| rbenv_version_dir.basename.to_s } + ["system"]
+      rbenv_versions = rbenv_version_dirs.map { |rbenv_version_dir| rbenv_version_dir.basename.to_s }.append("system")
 
       ruby_profile_map = Hash[rbenv_versions.map do |rbenv_version|
         child_env = ENV.to_hash
