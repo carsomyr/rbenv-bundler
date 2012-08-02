@@ -1,4 +1,7 @@
+/Gemfile.lock
+/.bundle/
 /.idea/
 /.yardoc/
 /doc/
 /share/
+/vendor/
