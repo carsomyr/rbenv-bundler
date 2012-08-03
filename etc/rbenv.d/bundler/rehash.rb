@@ -288,7 +288,7 @@ class RbenvBundler
     else
       return {} if (SEMANTIC_RUBY_VERSION <=> [1, 9]) < 0
 
-      rbenv_versions = rbenv_version_dirs.map { |rbenv_version_dir| rbenv_version_dir.basename.to_s }.append("system")
+      rbenv_versions = rbenv_version_dirs.map { |rbenv_version_dir| rbenv_version_dir.basename.to_s }.push("system")
 
       ruby_profile_map = Hash[rbenv_versions.map do |rbenv_version|
         child_env = ENV.to_hash
