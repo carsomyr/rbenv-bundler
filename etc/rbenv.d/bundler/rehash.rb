@@ -196,11 +196,11 @@ class RbenvBundler
     version_files = []
 
     while (parent = dir.parent) != dir
-      version_files << Pathname.new(".rbenv-version").expand_path(dir)
+      version_files.push(Pathname.new(".rbenv-version").expand_path(dir))
       dir = parent
     end
 
-    version_files << Pathname.new("version").expand_path(ENV["RBENV_ROOT"])
+    version_files.push(Pathname.new("version").expand_path(ENV["RBENV_ROOT"]))
 
     version_files.each do |version_file|
       return version_file.open("r") { |f| f.read.chomp("\n") } if version_file.exist?
