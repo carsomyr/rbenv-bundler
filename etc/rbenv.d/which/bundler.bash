@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # Copyright (C) 2011 Roy Liu
 # All rights reserved.
 #
