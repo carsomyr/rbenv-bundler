@@ -218,23 +218,21 @@ class RbenvBundler
     raise "The output directory does not exist" if !out_dir.directory?
 
     Pathname.new("manifest.txt").expand_path(out_dir).open("w") do |f|
-      manifest_map.each do |dir, manifest_file|
-        gemfile = gemfile(dir)
+      manifest_map.each do |gemfile, manifest_file|
+        next if !gemfile.file?
+
         manifest_file.expand_path(out_dir).delete if !manifest_file.nil?
 
-        next if gemfile.nil?
-
-        dir = gemfile.parent
-        ruby_profile = ruby_profile_map[rbenv_version(dir)]
+        ruby_profile = ruby_profile_map[rbenv_version(gemfile.parent)]
 
         next if ruby_profile.nil?
 
         # Fake the Ruby implementation to induce correct Bundler search behavior.
         Bundler.ruby_profile = ruby_profile
 
-        manifest_file = Pathname.new("#{Digest::MD5.hexdigest(dir.to_s)}.txt")
+        manifest_file = Pathname.new("#{Digest::MD5.hexdigest(gemfile.to_s)}.txt")
 
-        f.write(dir.to_s + "\n")
+        f.write(gemfile.to_s + "\n")
         f.write(manifest_file.to_s + "\n")
 
         manifest_file.expand_path(out_dir).open("w") do |f|
@@ -399,10 +397,11 @@ if __FILE__ == $0
   # Try to use a modern Ruby so that the rest of the script doesn't crash and burn.
   RbenvBundler.ensure_capable_ruby(ruby_profile_map)
 
-  dirs = positional_args.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }.compact.map { |gemfile| gemfile.parent }
+  gemfiles = (ENV.has_key?("BUNDLE_GEMFILE") ? [Pathname.new(ENV["BUNDLE_GEMFILE"]).expand_path] : []) \
+    .concat(positional_args.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }).compact
 
   # Merge in the contents of the current manifest if the "refresh" switch is provided.
-  manifest_map = Hash[dirs.zip([nil] * dirs.size)]
+  manifest_map = Hash[gemfiles.zip([nil] * gemfiles.size)]
   manifest_map = manifest_map.merge(RbenvBundler.read_manifest(opts[:out_dir])) if opts[:refresh]
 
   RbenvBundler.rehash(ruby_profile_map, manifest_map, opts[:out_dir])

@@ -45,10 +45,15 @@ function find_bundled_executable {
     manifest_entries=($manifest_entries)
     IFS=$ifs_save
 
+    local -- project_dir
+    local -- gemspec_entries
+
     for (( i = 0; i < ${#manifest_entries[@]}; i += 2 )); do
 
+        project_dir=$(dirname -- "${manifest_entries[$i]}")
+
         # Check if the manifest directory is a prefix of the current directory.
-        if [[ "${manifest_entries[$i]}" != "${PWD:0:${#manifest_entries[$i]}}" ]]; then
+        if [[ "$project_dir" != "${PWD:0:${#project_dir}}" ]]; then
             continue
         fi
 
