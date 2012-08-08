@@ -56,6 +56,8 @@ to report Bundler-installed gem executables if available.
 
 **0.94** (July 21, 2012)
 
+* Change the `rehash.rb` script so that it detects the `BUNDLE_GEMFILE`
+  environment variable and looks for a Bundler-controlled project there.
 * Fix issue [\#21](https://github.com/carsomyr/rbenv-bundler/issues/21), where
   the `RbenvBundler#ensure_capable_ruby` method would claim JRuby 1.9.x as
   capable when it's not (lack of `Kernel.fork`).
@@ -110,7 +112,7 @@ to report Bundler-installed gem executables if available.
 
 **0.90** (September 28, 2011)
 
-* Update plugin scripts to use the RBENV_DIR environment variable.
+* Update plugin scripts to use the `RBENV_DIR` environment variable.
 * Start release tagging.
 
 ### License
