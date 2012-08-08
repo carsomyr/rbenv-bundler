@@ -177,7 +177,7 @@ class RbenvBundler
     while (parent = dir.parent) != dir
       gemfile = Pathname.new("Gemfile").expand_path(dir)
 
-      return gemfile if gemfile.exist?
+      return gemfile if gemfile.file?
 
       dir = parent
     end
@@ -203,7 +203,7 @@ class RbenvBundler
     version_files.push(Pathname.new("version").expand_path(ENV["RBENV_ROOT"]))
 
     version_files.each do |version_file|
-      return version_file.open("r") { |f| f.read.chomp("\n") } if version_file.exist?
+      return version_file.open("r") { |f| f.read.chomp("\n") } if version_file.file?
     end
 
     "system"
@@ -215,7 +215,7 @@ class RbenvBundler
   # @param [Hash] manifest_map the Hash from Bundler-controlled directories to gemspec manifests.
   # @param [Pathname] out_dir the output directory.
   def self.rehash(ruby_profile_map, manifest_map, out_dir = Pathname.new("."))
-    raise "The output directory does not exist" if !out_dir.exist?
+    raise "The output directory does not exist" if !out_dir.directory?
 
     Pathname.new("manifest.txt").expand_path(out_dir).open("w") do |f|
       manifest_map.each do |dir, manifest_file|
@@ -262,7 +262,7 @@ class RbenvBundler
   def self.read_manifest(out_dir = Pathname.new("."))
     manifest_file = Pathname.new("manifest.txt").expand_path(out_dir)
 
-    return {} if !manifest_file.exist?
+    return {} if !manifest_file.file?
 
     manifest_file.open("r") do |f|
       Hash[*(f.read.split("\n", -1)[0...-1].map { |pathname| Pathname.new(pathname) })]
@@ -281,7 +281,7 @@ class RbenvBundler
     rbenv_versions_dir = Pathname.new("versions").expand_path(ENV["RBENV_ROOT"])
     rbenv_version_dirs = rbenv_versions_dir.children
 
-    if ruby_profiles_file.exist? && rbenv_versions_dir.mtime <= ruby_profiles_file.mtime
+    if ruby_profiles_file.file? && rbenv_versions_dir.mtime <= ruby_profiles_file.mtime
       ruby_profiles_file.open("r") do |f|
         YAML.load(f)
       end
