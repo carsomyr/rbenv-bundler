@@ -57,10 +57,10 @@ module Bundler
   end
 end
 
-# Contains class methods that support rbenv-bundler's rehash hook.
+# Contains module methods that support rbenv-bundler's rehash hook.
 #
 # @author Roy Liu
-class RbenvBundler
+module RbenvBundler
   class << self
     attr_reader :logger
   end
