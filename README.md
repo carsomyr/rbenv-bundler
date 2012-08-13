@@ -43,7 +43,7 @@ to report Bundler-installed gem executables if available.
 
         $ # If "rake" is a Bundler-installed gem executable, report its location
         $ # with "rbenv which". The result should look like
-        $ # "${PWD}/vendor/local/ruby/1.8/bin/rake"
+        $ # "${PWD}/vendor/local/ruby/1.9.1/bin/rake"
         $ rbenv which rake
 
         $ # Run "rake" without having to type "bundle exec rake".
