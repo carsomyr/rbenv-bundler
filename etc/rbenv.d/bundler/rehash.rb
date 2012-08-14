@@ -212,7 +212,7 @@ module RbenvBundler
   # Rehashes the given Bundler-controlled directories and builds a manifest from them, so that the Bash side of
   # rbenv-bundler can use it to answer "rbenv which" queries.
   #
-  # @param [Hash] manifest_map the Hash from Bundler-controlled directories to gemspec manifests.
+  # @param [Hash] manifest_map the `Hash` from Bundler-controlled directories to gemspec manifests.
   # @param [Pathname] out_dir the output directory.
   def self.rehash(ruby_profile_map, manifest_map, out_dir = Pathname.new("."))
     raise "The output directory does not exist" if !out_dir.directory?
@@ -256,7 +256,7 @@ module RbenvBundler
   #
   # @param [Pathname] out_dir the output directory where the current manifest file might reside.
   #
-  # @return [Hash] a Hash from Bundler-controlled directories to gemspec manifests.
+  # @return [Hash] a `Hash` from Bundler-controlled directories to gemspec manifests.
   def self.read_manifest(out_dir = Pathname.new("."))
     manifest_file = Pathname.new("manifest.txt").expand_path(out_dir)
 
@@ -273,7 +273,7 @@ module RbenvBundler
   #
   # @param [Pathname] out_dir the output directory where the current Ruby profiles file might reside.
   #
-  # @return [Hash] a Hash from rbenv version names to Ruby profiles.
+  # @return [Hash] a `Hash` from rbenv version names to Ruby profiles.
   def self.build_ruby_profiles(out_dir = Pathname.new("."))
     ruby_profiles_file = Pathname.new("ruby_profiles.yml").expand_path(out_dir)
     rbenv_versions_dir = Pathname.new("versions").expand_path(ENV["RBENV_ROOT"])
@@ -333,14 +333,14 @@ module RbenvBundler
   end
 
   # Ensures that we are running a capable Ruby implementation. If the script Ruby version is inappropriate, the given
-  # Ruby profiles will be searched and, if located, an appropriate one will be Kernel.exec'd.
+  # Ruby profiles will be searched and, if located, an appropriate one will be `Kernel#exec`'d.
   #
-  # @param [Hash] ruby_profile_map a Hash from rbenv version names to Ruby profiles.
+  # @param [Hash] ruby_profile_map a `Hash` from rbenv version names to Ruby profiles.
   def self.ensure_capable_ruby(ruby_profile_map)
     # Check if the current Ruby is capable.
     return nil if (SEMANTIC_RUBY_VERSION <=> [1, 9]) >= 0 && Gem.ruby_engine != "jruby"
 
-    # Find all Rubies that are 1.9+ and are not JRuby (no Kernel.fork).
+    # Find all Rubies that are 1.9+ and are not JRuby (no Kernel#fork).
     rbenv_versions = ruby_profile_map.select do |_, ruby_profile|
       (ruby_profile.ruby_version <=> [1, 9]) >= 0 && ruby_profile.gem_ruby_engine != "jruby"
     end.map do |entry|
@@ -348,7 +348,7 @@ module RbenvBundler
     end.sort
 
     if !rbenv_versions.empty?
-      # Ruby 1.8 compatibility: Kernel.exec does not accept a Hash of environment variables.
+      # Ruby 1.8 compatibility: Kernel#exec does not accept a Hash of environment variables.
       ENV.delete("PWD")
       ENV.delete("RBENV_DIR")
       ENV.delete("RBENV_HOOK_PATH")

@@ -60,7 +60,7 @@ to report Bundler-installed gem executables if available.
   environment variable and looks for a Bundler-controlled project there.
 * Fix issue [\#21](https://github.com/carsomyr/rbenv-bundler/issues/21), where
   the `RbenvBundler#ensure_capable_ruby` method would claim JRuby 1.9.x as
-  capable when it's not (lack of `Kernel.fork`).
+  capable when it's not (lack of `Kernel#fork`).
 * Fix issue [\#22](https://github.com/carsomyr/rbenv-bundler/issues/22). This
   addresses the corner cases when either the `manifest.txt` file doesn't exist
   or the `ruby_profiles.yml` file is first created.
@@ -82,7 +82,7 @@ to report Bundler-installed gem executables if available.
 
 * Ensure that a capable Ruby runs the `rehash.rb` script. Change the `rehash.rb`
   script so that if it detects an inappropriate Ruby version, it will attempt to
-  locate and `Kernel.exec` an appropriate one.
+  locate and `Kernel#exec` an appropriate one.
 * Build rbenv Ruby profiles to induce correct Bundler search behavior. With
   knowledge of each Ruby(Gems) implementation's version information and
   directory structure, the `rehash.rb` script can configure Bundler to exhibit
