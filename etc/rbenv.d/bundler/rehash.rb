@@ -31,12 +31,12 @@ SEMANTIC_RUBY_VERSION = RUBY_VERSION.split(".", -1).map { |s| s.to_i }
 
 # Ruby 1.8 compatibility: Explicitly require RubyGems.
 require "rubygems" if (SEMANTIC_RUBY_VERSION <=> [1, 9]) < 0
-require "bundler"
 require "digest/md5"
 require "logger"
 require "optparse"
 require "ostruct"
 require "pathname"
+require "yaml"
 
 # Monkey patch Bundler to make it more stateless.
 module Bundler
@@ -153,7 +153,7 @@ module RbenvBundler
           child_out.close
         end
 
-        exit!
+        exit!(true)
       end
     ensure
       # Restore old environment variables for later reuse.
@@ -166,7 +166,7 @@ module RbenvBundler
     end
   end
 
-  # Finds the Bundler Gemfile starting from the given directory.
+  # Finds the Gemfile starting from the given directory.
   #
   # @param [Pathname] dir the directory to start searching from.
   #
@@ -396,6 +396,13 @@ if __FILE__ == $0
 
   # Try to use a modern Ruby so that the rest of the script doesn't crash and burn.
   RbenvBundler.ensure_capable_ruby(ruby_profile_map)
+
+  begin
+    require "bundler"
+  rescue LoadError
+    RbenvBundler.logger.warn("Could not load the bundler gem for Ruby version #{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}.")
+    exit!(false)
+  end
 
   gemfiles = (ENV.has_key?("BUNDLE_GEMFILE") ? [Pathname.new(ENV["BUNDLE_GEMFILE"]).expand_path] : []) \
     .concat(positional_args.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }).compact
