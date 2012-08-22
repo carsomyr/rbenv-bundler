@@ -38,25 +38,6 @@ require "ostruct"
 require "pathname"
 require "yaml"
 
-# Monkey patch Bundler to make it more stateless.
-module Bundler
-  class << self
-    attr_accessor :ruby_profile
-  end
-
-  def self.bundle_path
-    Pathname.new(settings.path).expand_path(root)
-  end
-
-  def self.settings
-    Settings.new(app_config_path)
-  end
-
-  def self.ruby_scope
-    Pathname.new(ruby_profile.gem_ruby_engine).join(ruby_profile.gem_ruby_version).to_s
-  end
-end
-
 # Contains module methods that support rbenv-bundler's rehash hook.
 #
 # @author Roy Liu
@@ -362,6 +343,37 @@ module RbenvBundler
       raise "Could not locate a Ruby capable of running this script"
     end
   end
+
+  # Requires and monkey patches Bundler to allow repeated use over multiple Gemfiles.
+  def self.require_and_patch_bundler
+    begin
+      require "bundler"
+    rescue LoadError
+      logger.warn("Could not load the bundler gem for Ruby version #{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}.")
+      exit!(false)
+    end
+
+    # Monkey patch Bundler to make it more stateless.
+    Bundler.module_eval do
+      class << self
+        attr_accessor :ruby_profile
+      end
+
+      def self.bundle_path
+        Pathname.new(settings.path).expand_path(root)
+      end
+
+      def self.settings
+        Bundler::Settings.new(app_config_path)
+      end
+
+      def self.ruby_scope
+        Pathname.new(ruby_profile.gem_ruby_engine).join(ruby_profile.gem_ruby_version).to_s
+      end
+    end
+
+    nil
+  end
 end
 
 if __FILE__ == $0
@@ -397,12 +409,8 @@ if __FILE__ == $0
   # Try to use a modern Ruby so that the rest of the script doesn't crash and burn.
   RbenvBundler.ensure_capable_ruby(ruby_profile_map)
 
-  begin
-    require "bundler"
-  rescue LoadError
-    RbenvBundler.logger.warn("Could not load the bundler gem for Ruby version #{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}.")
-    exit!(false)
-  end
+  # Time to require Bundler and override some of its functionality.
+  RbenvBundler.require_and_patch_bundler
 
   gemfiles = (ENV.has_key?("BUNDLE_GEMFILE") ? [Pathname.new(ENV["BUNDLE_GEMFILE"]).expand_path] : []) \
     .concat(positional_args.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }).compact
