@@ -184,7 +184,7 @@ module RbenvBundler
     version_files.push(Pathname.new("version").expand_path(ENV["RBENV_ROOT"]))
 
     version_files.each do |version_file|
-      return version_file.open("r") { |f| f.read.chomp("\n") } if version_file.file?
+      return version_file.open("rb") { |f| f.read.chomp("\n") } if version_file.file?
     end
 
     "system"
@@ -198,7 +198,7 @@ module RbenvBundler
   def self.rehash(ruby_profile_map, manifest_map, out_dir = Pathname.new("."))
     raise "The output directory does not exist" if !out_dir.directory?
 
-    Pathname.new("manifest.txt").expand_path(out_dir).open("w") do |f|
+    Pathname.new("manifest.txt").expand_path(out_dir).open("wb") do |f|
       manifest_map.each do |gemfile, manifest_file|
         next if !gemfile.file?
 
@@ -216,7 +216,7 @@ module RbenvBundler
         f.write(gemfile.to_s + "\n")
         f.write(manifest_file.to_s + "\n")
 
-        manifest_file.expand_path(out_dir).open("w") do |f|
+        manifest_file.expand_path(out_dir).open("wb") do |f|
           gemspecs(gemfile).each do |gemspec|
             gemspec.executables.each do |executable|
               # We don't rehash the Bundler executable; otherwise, undesirable recursion would result.
@@ -243,7 +243,7 @@ module RbenvBundler
 
     return {} if !manifest_file.file?
 
-    manifest_file.open("r") do |f|
+    manifest_file.open("rb") do |f|
       Hash[*(f.read.split("\n", -1)[0...-1].map { |pathname| Pathname.new(pathname) })]
     end
   end
@@ -261,7 +261,7 @@ module RbenvBundler
     rbenv_version_dirs = rbenv_versions_dir.children
 
     if ruby_profiles_file.file? && rbenv_versions_dir.mtime <= ruby_profiles_file.mtime
-      ruby_profiles_file.open("r") do |f|
+      ruby_profiles_file.open("rb") do |f|
         YAML.load(f)
       end
     else
@@ -305,7 +305,7 @@ module RbenvBundler
         [rbenv_version, ruby_profile]
       end.select { |entry| !entry.nil? }]
 
-      ruby_profiles_file.open("w") do |f|
+      ruby_profiles_file.open("wb") do |f|
         YAML.dump(ruby_profile_map, f)
       end
 
