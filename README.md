@@ -56,6 +56,7 @@ to report Bundler-installed gem executables if available.
 
 **0.94** (July 21, 2012)
 
+* Relicense the project to the Apache License, Version 2.0.
 * Change the `rehash.rb` script so that it detects the `BUNDLE_GEMFILE`
   environment variable and looks for a Bundler-controlled project there.
 * Fix issue [\#21](https://github.com/carsomyr/rbenv-bundler/issues/21), where
