@@ -54,6 +54,10 @@ to report Bundler-installed gem executables if available.
 
 ### Version History
 
+**0.95** (January 10, 2013)
+
+* Make rbenv Ruby profile discovery more robust.
+
 **0.94** (July 21, 2012)
 
 * Relicense the project to the Apache License, Version 2.0.
