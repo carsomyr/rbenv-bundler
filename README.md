@@ -16,7 +16,7 @@ to report Bundler-installed gem executables if available.
         $ git clone -- git://github.com/carsomyr/rbenv-bundler.git \
           ~/.rbenv/plugins/bundler
 
-3. Make sure that there is a 1.9+ system or rbenv Ruby with the Bundler gem
+3. Make sure that there is a 1.8.7+ system or rbenv Ruby with the Bundler gem
    installed, available for the plugin's use.
 
         $ ruby -r bundler -e "puts RUBY_VERSION"
@@ -29,8 +29,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 1.9.3-p194.
-        $ rbenv local 1.9.3-p194
+        $ # Suppose the project uses Ruby version 1.9.3-p362.
+        $ rbenv local 1.9.3-p362
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
