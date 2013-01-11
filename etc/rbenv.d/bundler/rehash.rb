@@ -50,9 +50,9 @@ module RbenvBundler
   # @return [Array] the gemspecs resolved by Bundler.
   def self.gemspecs(gemfile)
     # Save old environment variables so that they can be restored later.
-    old_bundle_gemfile = ENV.delete("BUNDLE_GEMFILE")
-    old_gem_home = ENV.delete("GEM_HOME")
-    old_gem_path = ENV.delete("GEM_PATH")
+    env_old = {"BUNDLE_GEMFILE" => ENV.delete("BUNDLE_GEMFILE"),
+               "GEM_HOME" => ENV.delete("GEM_HOME"),
+               "GEM_PATH" => ENV.delete("GEM_PATH")}
 
     # Override the Gemfile location.
     ENV["BUNDLE_GEMFILE"] = gemfile.expand_path.to_s
@@ -126,9 +126,7 @@ module RbenvBundler
       end
     ensure
       # Restore old environment variables for later reuse.
-      ENV["BUNDLE_GEMFILE"] = old_bundle_gemfile
-      ENV["GEM_HOME"] = old_gem_home
-      ENV["GEM_PATH"] = old_gem_path
+      ENV.update(env_old)
 
       Bundler.rubygems.clear_paths
       Bundler.rubygems.refresh
@@ -245,60 +243,74 @@ module RbenvBundler
   # @return [Hash] a `Hash` from rbenv version names to Ruby profiles.
   def self.build_ruby_profiles(out_dir = Pathname.new("."))
     ruby_profiles_file = Pathname.new("ruby_profiles.yml").expand_path(out_dir)
-    rbenv_versions_dir = Pathname.new("versions").expand_path(ENV["RBENV_ROOT"])
-    rbenv_version_dirs = rbenv_versions_dir.children
 
-    if ruby_profiles_file.file? && rbenv_versions_dir.mtime <= ruby_profiles_file.mtime
-      ruby_profiles_file.open("rb") do |f|
+    if ruby_profiles_file.file?
+      ruby_profile_map = ruby_profiles_file.open("rb") do |f|
         YAML.load(f)
       end
     else
-      return {} if (SEMANTIC_RUBY_VERSION <=> [1, 9]) < 0
+      ruby_profile_map = {}
+    end
 
-      rbenv_versions = rbenv_version_dirs.map { |rbenv_version_dir| rbenv_version_dir.basename.to_s }.push("system")
+    ruby_profile_map_old = ruby_profile_map.clone
 
-      ruby_profile_map = Hash[rbenv_versions.map do |rbenv_version|
-        child_env = ENV.to_hash
-        child_env.delete("PWD")
-        child_env.delete("RBENV_DIR")
-        child_env.delete("RBENV_HOOK_PATH")
-        child_env.delete("RBENV_ROOT")
+    rbenv_versions_dir = Pathname.new("versions").expand_path(ENV["RBENV_ROOT"])
+    rbenv_versions_dir.mkpath
 
-        # Pop off the first bin directory, which contains the script Ruby.
-        child_env["PATH"] = child_env["PATH"].split(":", -1)[1..-1].join(":")
-        child_env["RBENV_VERSION"] = rbenv_version
+    rbenv_versions_dir.children \
+      .map { |rbenv_version_dir| rbenv_version_dir.basename.to_s } \
+      .push("system") \
+      .select { |rbenv_version| !ruby_profile_map.include?(rbenv_version) } \
+      .each do |rbenv_version|
+      env_old = {"PATH" => ENV["PATH"],
+                 "PWD" => ENV.delete("PWD"),
+                 "RBENV_DIR" => ENV.delete("RBENV_DIR"),
+                 "RBENV_HOOK_PATH" => ENV.delete("RBENV_HOOK_PATH"),
+                 "RBENV_VERSION" => ENV["RBENV_VERSION"]}
 
-        ruby_profile = IO.popen([child_env, "ruby",
-                                 "-r", "rubygems",
-                                 "-e", "puts RUBY_VERSION\n" \
-                                  "puts Gem.dir\n" \
-                                  "puts Gem.ruby_engine\n" \
-                                  "puts Gem::ConfigMap[:ruby_version]\n",
-                                 # Ruby 1.8 compatibility: Declare Hashes explicitly when embedded in Array literals.
-                                 {:unsetenv_others => true}]) do |child_out|
+      # Pop off the first bin directory, which contains the script Ruby.
+      ENV["PATH"] = ENV["PATH"].split(":", -1)[1..-1].join(":")
+      ENV["RBENV_VERSION"] = rbenv_version
+
+      begin
+        IO.popen("ruby -r rubygems -e \"" \
+                  "puts RUBY_VERSION\n" \
+                  "puts Gem.dir\n" \
+                  "puts Gem.ruby_engine\n" \
+                  "puts Gem::ConfigMap[:ruby_version]\n" \
+                  "\"") do |child_out|
           child_out_s = child_out.read
 
           # If the child's output is empty, the rbenv Ruby is likely nonexistent.
-          next nil if child_out_s.empty?
+          next if child_out_s.empty?
 
           values = child_out_s.split("\n", -1)[0...-1]
-          OpenStruct.new(:ruby_version => values[0].split(".", -1).map { |s| s.to_i },
-                         :gem_dir => Pathname.new(values[1]),
-                         :gem_ruby_engine => values[2],
-                         :gem_ruby_version => values[3])
+          ruby_profile_map[rbenv_version] = OpenStruct.new(
+              :ruby_version => values[0].split(".", -1).map { |s| s.to_i },
+              :gem_dir => Pathname.new(values[1]),
+              :gem_ruby_engine => values[2],
+              :gem_ruby_version => values[3]
+          )
         end
+      ensure
+        ENV.update(env_old)
+      end
+    end
 
-        next nil if ruby_profile.nil?
+    ruby_profile_map = ruby_profile_map.select do |rbenv_version, _|
+      Pathname.new(rbenv_version).expand_path(rbenv_versions_dir).directory? || rbenv_version == "system"
+    end
 
-        [rbenv_version, ruby_profile]
-      end.select { |entry| !entry.nil? }]
+    # Ugh, Ruby 1.8 quirks.
+    ruby_profile_map = Hash[ruby_profile_map] if ruby_profile_map.is_a?(Array)
 
-      ruby_profiles_file.open("wb") do |f|
+    if ruby_profile_map != ruby_profile_map_old
+      ruby_profiles_file.open("w") do |f|
         YAML.dump(ruby_profile_map, f)
       end
-
-      ruby_profile_map
     end
+
+    ruby_profile_map
   end
 
   # Ensures that we are running a capable Ruby implementation. If the script Ruby version is inappropriate, the given
@@ -321,7 +333,6 @@ module RbenvBundler
       ENV.delete("PWD")
       ENV.delete("RBENV_DIR")
       ENV.delete("RBENV_HOOK_PATH")
-      ENV.delete("RBENV_ROOT")
 
       ENV["PATH"] = ENV["PATH"].split(":", -1)[1..-1].join(":")
       ENV["RBENV_VERSION"] = rbenv_versions[0]
