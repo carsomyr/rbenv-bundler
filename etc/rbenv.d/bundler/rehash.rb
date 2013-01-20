@@ -163,7 +163,9 @@ module RbenvBundler
     version_files = []
 
     while (parent = dir.parent) != dir
-      version_files.push(Pathname.new(".rbenv-version").expand_path(dir))
+      version_files \
+        .push(Pathname.new(".ruby-version").expand_path(dir)) \
+        .push(Pathname.new(".rbenv-version").expand_path(dir))
       dir = parent
     end
 
