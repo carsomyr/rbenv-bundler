@@ -56,6 +56,8 @@ to report Bundler-installed gem executables if available.
 
 **0.95** (January 10, 2013)
 
+* Set up the `PATH` environment variable correctly when building rbenv Ruby
+  profiles.
 * Make rbenv Ruby profile discovery more robust.
 
 **0.94** (July 21, 2012)

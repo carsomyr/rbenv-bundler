@@ -234,6 +234,18 @@ module RbenvBundler
     end
   end
 
+  # Trim the first component of the `PATH` environment variable if it belongs to an rbenv Ruby.
+  def self.trim_path!
+    return nil if !ENV["RBENV_VERSION"] || ENV["RBENV_VERSION"] == "system"
+
+    path_dirs = ENV["PATH"].split(":", -1).map { |s| Pathname.new(s) }
+
+    ENV["PATH"] = path_dirs[1..-1].map { |dir| dir.to_s }.join(":") \
+      if path_dirs[0] == Pathname.new("versions").join(ENV["RBENV_VERSION"], "bin").expand_path(ENV["RBENV_ROOT"])
+
+    nil
+  end
+
   # Builds rbenv Ruby profiles. With comprehensive knowledge of each Ruby(Gems) implementation's version information and
   # directory structure, the script can configure Bundler to exhibit the correct search behavior, despite it being meant
   # for operation with just the script Ruby(Gems).
@@ -267,13 +279,12 @@ module RbenvBundler
                  "RBENV_DIR" => ENV.delete("RBENV_DIR"),
                  "RBENV_HOOK_PATH" => ENV.delete("RBENV_HOOK_PATH"),
                  "RBENV_VERSION" => ENV["RBENV_VERSION"]}
+      trim_path!
 
-      # Pop off the first bin directory, which contains the script Ruby.
-      ENV["PATH"] = ENV["PATH"].split(":", -1)[1..-1].join(":")
       ENV["RBENV_VERSION"] = rbenv_version
 
       begin
-        IO.popen("ruby -r rubygems -e \"" \
+        IO.popen("rbenv exec ruby -r rubygems -e \"" \
                   "puts RUBY_VERSION\n" \
                   "puts Gem.dir\n" \
                   "puts Gem.ruby_engine\n" \
@@ -334,7 +345,8 @@ module RbenvBundler
       ENV.delete("RBENV_DIR")
       ENV.delete("RBENV_HOOK_PATH")
 
-      ENV["PATH"] = ENV["PATH"].split(":", -1)[1..-1].join(":")
+      trim_path!
+
       ENV["RBENV_VERSION"] = rbenv_versions[0]
 
       exec("rbenv", "exec", "ruby", "--", __FILE__, *ARGV)
