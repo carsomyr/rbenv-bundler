@@ -5,6 +5,22 @@ paths. It saves you from the hassle of having to type `bundle exec ${command}`
 when working with per-project gemsets and will enable `rbenv which ${command}`
 to report Bundler-installed gem executables if available.
 
+### A Word of Warning
+
+Using this plugin has consequences. It runs an internal Ruby script to maintain
+the link between rbenv shims and Bundler-controlled executables, and this *will*
+slow down `rbenv rehash` and your shell initialization. For the reason above and
+its statefulness across invocations, this plugin is [not sanctioned by the rbenv
+maintainers](https://github.com/sstephenson/rbenv/wiki/Plugins). As an
+alternative, consider the [binstubs method]
+(https://github.com/sstephenson/rbenv/wiki/Understanding-binstubs).
+
+Why the solemn warning label, and why criticize one's own project? Well, because
+using rbenv with Bundler seamlessly isn't yet a solved problem. Inspecting
+Bundler-controlled projects for gem executables, the mechanism employed by this
+plugin, is costly and complicated. On the other hand, using Bundler binstubs and
+prepending `./bin` to `PATH` is pretty much a hack. Rock, meet hard place.
+
 ### Installation
 
 1. Get [rbenv](https://github.com/sstephenson/rbenv) working. Read the
@@ -29,8 +45,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 1.9.3-p362.
-        $ rbenv local 1.9.3-p362
+        $ # Suppose the project uses Ruby version 1.9.3-p374.
+        $ rbenv local 1.9.3-p374
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
