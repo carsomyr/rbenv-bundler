@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-source :rubygems
+source "https://rubygems.org"
 
 gem "redcarpet"
 gem "yard"
