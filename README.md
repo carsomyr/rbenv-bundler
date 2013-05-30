@@ -5,22 +5,6 @@ paths. It saves you from the hassle of having to type `bundle exec ${command}`
 when working with per-project gemsets and will enable `rbenv which ${command}`
 to report Bundler-installed gem executables if available.
 
-### A Word of Warning
-
-Using this plugin has consequences. It runs an internal Ruby script to maintain
-the link between rbenv shims and Bundler-controlled executables, and this *will*
-slow down `rbenv rehash` and your shell initialization. For the reason above and
-its statefulness across invocations, this plugin is [not sanctioned by the rbenv
-maintainers](https://github.com/sstephenson/rbenv/wiki/Plugins). As an
-alternative, consider the [binstubs method]
-(https://github.com/sstephenson/rbenv/wiki/Understanding-binstubs).
-
-Why the solemn warning label, and why criticize one's own project? Well, because
-using rbenv with Bundler seamlessly isn't yet a solved problem. Inspecting
-Bundler-controlled projects for gem executables, the mechanism employed by this
-plugin, is costly and complicated. On the other hand, using Bundler binstubs and
-prepending `./bin` to `PATH` is pretty much a hack. Rock, meet hard place.
-
 ### Installation
 
 1. Get [rbenv](https://github.com/sstephenson/rbenv) working. Read the
@@ -45,14 +29,14 @@ prepending `./bin` to `PATH` is pretty much a hack. Rock, meet hard place.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 1.9.3-p374.
-        $ rbenv local 1.9.3-p374
+        $ # Suppose the project uses Ruby version 1.9.3-p429.
+        $ rbenv local 1.9.3-p429
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
 
         $ # Suppose you already have a Gemfile.
-        $ bundle install --path vendor/bundle
+        $ bundle install
 
         $ # Don't forget to rehash!
         $ rbenv rehash
@@ -68,7 +52,22 @@ prepending `./bin` to `PATH` is pretty much a hack. Rock, meet hard place.
 2. If you wish to disable the plugin, type `rbenv bundler off`. Type `rbenv
    bundler on` to enable.
 
+3. **Note**: As of version 0.96, you will no longer need to type `rbenv rehash`
+   after `bundle install` or `bundle update`, as the plugin will automagically
+   rehash for you. Still, it's good practice to not rely on magic and type
+   `rbenv rehash` upon installation of gems with executables.
+
 ### Version History
+
+**0.96** (May 29, 2013)
+
+* Automagically rehash after `bundle install` and `bundle update`. This is
+  achieved by intercepting either command and using an internally provided
+  script that rehashes afterwards.
+* Optimize rehash times by not running the `rehash.rb` script if discovered
+  Gemfiles haven't changed. This is achieved by comparing the modification times
+  of Gemfile manifests against their Gemfiles. Slow shell initialization should
+  now be a thing of the past.
 
 **0.95** (January 10, 2013)
 
