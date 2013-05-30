@@ -20,7 +20,9 @@ if [[ -n "$plugin_disabled" ]]; then
     return -- 0
 fi
 
-if { ! bundled_executable=$(find_bundled_executable); } then
+manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
+
+if { ! bundled_executable=$(find_bundled_executable "$manifest_dir"); } then
     return -- 0
 fi
 

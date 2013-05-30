@@ -18,7 +18,7 @@
 # given rbenv command.
 function find_bundled_executable {
 
-    local -- manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
+    local -- manifest_dir=$1
     local -- manifest_entries
 
     if [[ -f "${manifest_dir}/manifest.txt" ]]; then
