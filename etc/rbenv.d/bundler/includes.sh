@@ -68,6 +68,81 @@ function find_bundled_executable {
     return -- 1
 }
 
+# Gets whether the heavyweight, script-based rehash operation is needed by comparing the modification times of Gemfile
+# manifests against their Gemfiles.
+function needs_rehash_script {
+
+    local -- manifest_dir=$1
+
+    if [[ ! -f "${manifest_dir}/manifest.txt" ]]; then
+        return -- 0
+    fi
+
+    local -- acc=$PWD
+
+    while [[ "$acc" != "$(dirname -- "$acc")" ]]; do
+
+        if [[ -f "${acc}/Gemfile" ]]; then
+            return -- 0
+        fi
+
+        acc=$(dirname -- "$acc")
+    done
+
+    local -- manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
+    local -- ifs_save=$IFS
+
+    IFS=$'\n'
+    manifest_entries=($manifest_entries)
+    IFS=$ifs_save
+
+    for (( i = 0; i < ${#manifest_entries[@]}; i += 2 )); do
+
+        if [[ "${manifest_dir}/${manifest_entries[$(($i + 1))]}" -ot "${manifest_entries[$i]}" ]]; then
+            return -- 0
+        fi
+    done
+
+    return -- 1
+}
+
+# Generates shims for the executables listed in Gemfile manifests.
+function make_gemfile_shims {
+
+    local -- manifest_dir=$1
+    local -- manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
+
+    ifs_save=$IFS
+
+    IFS=$'\n'
+    manifest_entries=($manifest_entries)
+    IFS=$ifs_save
+
+    for (( i = 0; i < ${#manifest_entries[@]}; i += 2 )); do
+
+        gemspec_entries=$(cat -- "${manifest_dir}/${manifest_entries[$(($i + 1))]}")
+
+        ifs_save=$IFS
+
+        IFS=$'\n'
+        gemspec_entries=($gemspec_entries)
+        IFS=$ifs_save
+
+        for (( j = 0; j < ${#gemspec_entries[@]}; j += 2 )); do
+
+            gem_executable="${gemspec_entries[$(($j + 1))]}/${gemspec_entries[$j]}"
+
+            if [[ ! -f "$gem_executable" ]]; then
+                continue
+            fi
+
+            cd -- "$SHIM_PATH" && make_shims "$gem_executable"; cd -- "$PWD"
+        done
+    done
+
+    return -- 0
+}
+
 # The plugins root directory.
 plugin_root_dir=$(dirname -- "$(dirname -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")")")
 

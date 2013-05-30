@@ -21,39 +21,10 @@ if [[ -n "$plugin_disabled" ]]; then
 fi
 
 manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
-rehash_rb_script="${plugin_root_dir}/etc/rbenv.d/bundler/rehash.rb"
+rehash_script="${plugin_root_dir}/etc/rbenv.d/bundler/rehash.rb"
 
-mkdir -p -- "$manifest_dir"
-touch -- "${manifest_dir}/manifest.txt"
+if { needs_rehash_script "$manifest_dir"; } then
+    "$rehash_script" --refresh --verbose --out-dir "$manifest_dir" -- "$PWD" || true
+fi
 
-"$rehash_rb_script" --refresh --verbose --out-dir "$manifest_dir" -- "$PWD" || true
-
-manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
-
-ifs_save=$IFS
-
-IFS=$'\n'
-manifest_entries=($manifest_entries)
-IFS=$ifs_save
-
-for (( i = 0; i < ${#manifest_entries[@]}; i += 2 )); do
-
-    gemspec_entries=$(cat -- "${manifest_dir}/${manifest_entries[$(($i + 1))]}")
-
-    ifs_save=$IFS
-
-    IFS=$'\n'
-    gemspec_entries=($gemspec_entries)
-    IFS=$ifs_save
-
-    for (( j = 0; j < ${#gemspec_entries[@]}; j += 2 )); do
-
-        gem_executable="${gemspec_entries[$(($j + 1))]}/${gemspec_entries[$j]}"
-
-        if [[ ! -f "$gem_executable" ]]; then
-            continue
-        fi
-
-        cd -- "$SHIM_PATH" && make_shims "$gem_executable"; cd -- "$PWD"
-    done
-done
+make_gemfile_shims "$manifest_dir"

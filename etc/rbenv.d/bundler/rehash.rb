@@ -184,8 +184,6 @@ module RbenvBundler
   # @param [Hash] manifest_map the `Hash` from Bundler-controlled directories to gemspec manifests.
   # @param [Pathname] out_dir the output directory.
   def self.rehash(ruby_profile_map, manifest_map, out_dir = Pathname.new("."))
-    raise "The output directory does not exist" if !out_dir.directory?
-
     Pathname.new("manifest.txt").expand_path(out_dir).open("wb") do |f|
       manifest_map.each do |gemfile, manifest_file|
         next if !gemfile.file?
@@ -411,7 +409,10 @@ if __FILE__ == $0
     end
 
     opt_spec.on("-o", "--out-dir OUT_DIR", "output metadata files to this directory") do |out_dir|
-      opts[:out_dir] = Pathname.new(out_dir)
+      p = Pathname.new(out_dir)
+      p.mkpath
+
+      opts[:out_dir] = p
     end
   end.parse(ARGV)
 
