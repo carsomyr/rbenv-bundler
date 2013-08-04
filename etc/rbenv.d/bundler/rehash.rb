@@ -355,8 +355,8 @@ module RbenvBundler
     end
   end
 
-  # Requires and monkey patches Bundler to allow repeated use over multiple Gemfiles.
-  def self.require_and_patch_bundler
+  # Monkey patches Bundler and RubyGems to allow repeated use over multiple Gemfiles.
+  def self.patch_bundler_and_rubygems
     begin
       require "bundler"
     rescue LoadError
@@ -380,6 +380,34 @@ module RbenvBundler
 
       def self.ruby_scope
         Pathname.new(ruby_profile.gem_ruby_engine).join(ruby_profile.gem_ruby_version).to_s
+      end
+    end
+
+    # Spoof the RubyGems platform. This is necessary because the Ruby parsing the Gemfile may have a platform different
+    # from the project Ruby.
+
+    Gem.class_eval do
+      def self.platforms
+        [Gem::Platform::RUBY, Gem::Platform.local]
+      end
+    end
+
+    Gem::Platform.class_eval do
+      class << self
+        alias_method :original_local, :local
+      end
+
+      def self.local
+        gem_ruby_engine = Bundler.ruby_profile.gem_ruby_engine
+
+        case gem_ruby_engine
+          when "ruby"
+            original_local
+          when "jruby"
+            Gem::Platform.new("jruby")
+          else
+            raise "Unknown gem Ruby engine #{gem_ruby_engine.dump}"
+        end
       end
     end
 
@@ -424,7 +452,7 @@ if __FILE__ == $0
   RbenvBundler.ensure_capable_ruby(ruby_profile_map)
 
   # Time to require Bundler and override some of its functionality.
-  RbenvBundler.require_and_patch_bundler
+  RbenvBundler.patch_bundler_and_rubygems
 
   gemfiles = (ENV.has_key?("BUNDLE_GEMFILE") ? [Pathname.new(ENV["BUNDLE_GEMFILE"]).expand_path] : []) \
     .concat(positional_args.map { |arg| RbenvBundler.gemfile(Pathname.new(arg)) }).compact
