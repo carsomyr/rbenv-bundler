@@ -29,8 +29,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 1.9.3-p429.
-        $ rbenv local 1.9.3-p429
+        $ # Suppose the project uses Ruby version 1.9.3-p448.
+        $ rbenv local 1.9.3-p448
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
@@ -58,6 +58,11 @@ to report Bundler-installed gem executables if available.
    `rbenv rehash` upon installation of gems with executables.
 
 ### Version History
+
+**0.97** (tentative)
+
+* Spoof RubyGems platform information to handle the case when the Ruby parsing
+  the Gemfile has a platform different from the project Ruby.
 
 **0.96** (May 29, 2013)
 
