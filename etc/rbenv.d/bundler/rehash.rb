@@ -90,7 +90,6 @@ module RbenvBundler
     end
 
     Bundler.rubygems.clear_paths
-    Bundler.rubygems.refresh
 
     runtime = Bundler::Runtime.new(bundler_gemfile.parent,
                                    Bundler::Definition.build(bundler_gemfile, bundler_lockfile, nil))
@@ -129,7 +128,6 @@ module RbenvBundler
       ENV.update(env_old)
 
       Bundler.rubygems.clear_paths
-      Bundler.rubygems.refresh
     end
   end
 
