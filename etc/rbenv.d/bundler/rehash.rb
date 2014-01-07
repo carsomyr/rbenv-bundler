@@ -45,7 +45,7 @@ module RbenvBundler
   # Word of warning: This method manipulates Bundler internals in obscure ways and is not guaranteed to work in the
   # future.
   #
-  # @param [Pathname] gemfile the Gemfile.
+  # @param gemfile [Pathname] the Gemfile.
   #
   # @return [Array] the gemspecs resolved by Bundler.
   def self.gemspecs(gemfile)
@@ -133,7 +133,7 @@ module RbenvBundler
 
   # Finds the Gemfile starting from the given directory.
   #
-  # @param [Pathname] dir the directory to start searching from.
+  # @param dir [Pathname] the directory to start searching from.
   #
   # @return [Pathname] the Gemfile, or nil if it doesn't exist.
   def self.gemfile(dir = Pathname.new("."))
@@ -152,7 +152,7 @@ module RbenvBundler
 
   # Finds the rbenv Ruby version starting from the given directory.
   #
-  # @param [Pathname] dir the directory to start searching from.
+  # @param dir [Pathname] the directory to start searching from.
   #
   # @return [String] the rbenv Ruby version, or "system" if an rbenv Ruby could not be found.
   def self.rbenv_version(dir = Pathname.new("."))
@@ -179,8 +179,8 @@ module RbenvBundler
   # Rehashes the given Bundler-controlled directories and builds a manifest from them, so that the Bash side of
   # rbenv-bundler can use it to answer "rbenv which" queries.
   #
-  # @param [Hash] manifest_map the `Hash` from Bundler-controlled directories to gemspec manifests.
-  # @param [Pathname] out_dir the output directory.
+  # @param manifest_map [Hash] the `Hash` from Bundler-controlled directories to gemspec manifests.
+  # @param out_dir [Pathname] the output directory.
   def self.rehash(ruby_profile_map, manifest_map, out_dir = Pathname.new("."))
     Pathname.new("manifest.txt").expand_path(out_dir).open("wb") do |f|
       manifest_map.each do |gemfile, manifest_file|
@@ -219,7 +219,7 @@ module RbenvBundler
 
   # Reads in the current manifest if it exists.
   #
-  # @param [Pathname] out_dir the output directory where the current manifest file might reside.
+  # @param out_dir [Pathname] the output directory where the current manifest file might reside.
   #
   # @return [Hash] a `Hash` from Bundler-controlled directories to gemspec manifests.
   def self.read_manifest(out_dir = Pathname.new("."))
@@ -248,7 +248,7 @@ module RbenvBundler
   # directory structure, the script can configure Bundler to exhibit the correct search behavior, despite it being meant
   # for operation with just the script Ruby(Gems).
   #
-  # @param [Pathname] out_dir the output directory where the current Ruby profiles file might reside.
+  # @param out_dir [Pathname] the output directory where the current Ruby profiles file might reside.
   #
   # @return [Hash] a `Hash` from rbenv version names to Ruby profiles.
   def self.build_ruby_profiles(out_dir = Pathname.new("."))
@@ -325,7 +325,7 @@ module RbenvBundler
   # Ensures that we are running a capable Ruby implementation. If the script Ruby version is inappropriate, the given
   # Ruby profiles will be searched and, if located, an appropriate one will be `Kernel#exec`'d.
   #
-  # @param [Hash] ruby_profile_map a `Hash` from rbenv version names to Ruby profiles.
+  # @param ruby_profile_map [Hash] a `Hash` from rbenv version names to Ruby profiles.
   def self.ensure_capable_ruby(ruby_profile_map)
     # Check if the current Ruby is capable.
     return nil if (SEMANTIC_RUBY_VERSION <=> [1, 9]) >= 0 && Gem.ruby_engine != "jruby"
