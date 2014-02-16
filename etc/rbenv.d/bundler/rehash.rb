@@ -399,7 +399,7 @@ module RbenvBundler
         gem_ruby_engine = Bundler.ruby_profile.gem_ruby_engine
 
         case gem_ruby_engine
-          when "ruby"
+          when "ruby", "rbx"
             original_local
           when "jruby"
             Gem::Platform.new("jruby")
