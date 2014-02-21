@@ -20,7 +20,7 @@ to report Bundler-installed gem executables if available.
    installed, available for the plugin's use.
 
         $ ruby -r bundler -e "puts RUBY_VERSION"
-          1.9.3
+          2.0.0
 
 ### Usage
 
@@ -29,8 +29,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 1.9.3-p448.
-        $ rbenv local 1.9.3-p448
+        $ # Suppose the project uses Ruby version 2.0.0-p353.
+        $ rbenv local 2.0.0-p353
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
@@ -59,8 +59,9 @@ to report Bundler-installed gem executables if available.
 
 ### Version History
 
-**0.97** (tentative)
+**0.97** (Feb 20, 2014)
 
+* Recognize Rubinius as a valid Ruby engine.
 * Spoof RubyGems platform information to handle the case when the Ruby parsing
   the Gemfile has a platform different from the project Ruby.
 
