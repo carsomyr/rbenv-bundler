@@ -105,23 +105,27 @@ module RbenvBundler
         gemspecs = YAML.load(child_in) || []
         child_in.close
 
-        Process.waitpid2(pid)
+        _, status = Process.waitpid2(pid)
 
-        gemspecs
+        status.exitstatus == 0 ? gemspecs : nil
       else
         child_in.close
 
         begin
           YAML.dump(runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
                                                                  :executables => gemspec.executables) }, child_out)
+
+          success = true
         rescue Bundler::GemNotFound, Bundler::GitError => e
           logger.warn("Bundler gave the error #{e.message.dump} while processing #{bundler_gemfile.to_s.dump}." \
             " Perhaps you forgot to run \"bundle install\"?")
+
+          success = false
         ensure
           child_out.close
         end
 
-        exit!(true)
+        exit!(success)
       end
     ensure
       # Restore old environment variables for later reuse.
@@ -195,19 +199,23 @@ module RbenvBundler
         # Fake the Ruby implementation to induce correct Bundler search behavior.
         Bundler.ruby_profile = ruby_profile
 
-        manifest_file = Pathname.new("#{Digest::MD5.hexdigest(gemfile.to_s)}.txt")
+        gemspecs = gemspecs(gemfile)
 
-        f.write(gemfile.to_s + "\n")
-        f.write(manifest_file.to_s + "\n")
+        if !gemspecs.nil?
+          manifest_file = Pathname.new("#{Digest::MD5.hexdigest(gemfile.to_s)}.txt")
 
-        manifest_file.expand_path(out_dir).open("wb") do |f|
-          gemspecs(gemfile).each do |gemspec|
-            gemspec.executables.each do |executable|
-              # We don't rehash the Bundler executable; otherwise, undesirable recursion would result.
-              next if executable == "bundle"
+          f.write(gemfile.to_s + "\n")
+          f.write(manifest_file.to_s + "\n")
 
-              f.write(executable + "\n")
-              f.write(gemspec.bin_dir + "\n")
+          manifest_file.expand_path(out_dir).open("wb") do |f|
+            gemspecs.each do |gemspec|
+              gemspec.executables.each do |executable|
+                # We don't rehash the Bundler executable; otherwise, undesirable recursion would result.
+                next if executable == "bundle"
+
+                f.write(executable + "\n")
+                f.write(gemspec.bin_dir + "\n")
+              end
             end
           end
         end
@@ -402,7 +410,7 @@ module RbenvBundler
           when "ruby", "rbx"
             original_local
           when "jruby"
-            Gem::Platform.new("jruby")
+            Gem::Platform::JAVA
           else
             raise "Unknown gem Ruby engine #{gem_ruby_engine.dump}"
         end
