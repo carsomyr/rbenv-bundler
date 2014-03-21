@@ -147,7 +147,7 @@ function make_gemfile_shims {
 plugin_root_dir=$(dirname -- "$(dirname -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")")")
 
 # Whether the plugin is disabled.
-if [[ -f "${plugin_root_dir}/share/rbenv/bundler/disabled" ]]; then
+if [[ -f "${plugin_root_dir}/share/rbenv/bundler/disabled" ]] || [[ -n "$_DISABLE_RBENV_BUNDLER" ]]; then
     plugin_disabled="1"
 else
     plugin_disabled=""

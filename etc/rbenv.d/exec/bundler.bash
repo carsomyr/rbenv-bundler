@@ -36,7 +36,8 @@ fi
 
 # Instead of running "$RBENV_COMMAND", run "bundle exec ${RBENV_COMMAND}" instead.
 
-RBENV_BIN_PATH=$(dirname -- "$bundled_executable")
+RBENV_BIN_PATH=$(_DISABLE_RBENV_BUNDLER=1 rbenv-which "$RBENV_COMMAND")
+RBENV_BIN_PATH=${RBENV_BIN_PATH%/*}
 RBENV_COMMAND="bundle"
 RBENV_COMMAND_PATH=$(rbenv-which "$RBENV_COMMAND")
 
