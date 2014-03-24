@@ -20,7 +20,7 @@ to report Bundler-installed gem executables if available.
    installed, available for the plugin's use.
 
         $ ruby -r bundler -e "puts RUBY_VERSION"
-          2.0.0
+          2.1.1
 
 ### Usage
 
@@ -29,8 +29,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 2.0.0-p353.
-        $ rbenv local 2.0.0-p353
+        $ # Suppose the project uses Ruby version 2.1.1.
+        $ rbenv local 2.1.1
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
@@ -58,6 +58,14 @@ to report Bundler-installed gem executables if available.
    `rbenv rehash` upon installation of gems with executables.
 
 ### Version History
+
+**0.98** (tentative)
+
+* Fix issue [\#42](https://github.com/carsomyr/rbenv-bundler/issues/42), where
+  Bundler would behave differently when a given gem's internal `bin` directory,
+  as opposed to the rbenv Ruby's `bin` directory, is prepended onto the `PATH`
+  environment variable. This caused shims for gems like `unicorn` to fail
+  mysteriously.
 
 **0.97** (Feb 20, 2014)
 
