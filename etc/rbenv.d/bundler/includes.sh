@@ -110,6 +110,11 @@ function needs_rehash_script {
 function make_gemfile_shims {
 
     local -- manifest_dir=$1
+
+    if [[ ! -f "${manifest_dir}/manifest.txt" ]]; then
+        return -- 0
+    fi
+
     local -- manifest_entries=$(cat -- "${manifest_dir}/manifest.txt")
 
     ifs_save=$IFS
@@ -147,8 +152,8 @@ function make_gemfile_shims {
 plugin_root_dir=$(dirname -- "$(dirname -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")")")
 
 # Whether the plugin is disabled.
-if [[ -f "${plugin_root_dir}/share/rbenv/bundler/disabled" ]]; then
-    plugin_disabled="1"
+if [[ -f "${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 -q -s "$RBENV_ROOT")" ]]; then
+    plugin_enabled="1"
 else
-    plugin_disabled=""
+    plugin_enabled=""
 fi

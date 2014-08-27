@@ -18,17 +18,28 @@
 
 set -e
 
-source -- "$(dirname -- "$(dirname -- "$0")")/etc/rbenv.d/bundler/includes.sh"
+# The script may be a symlink created by Homebrew.
+script_path=$(readlink -- "$0" || true)
+current_dir=$PWD
+
+if [[ -z "$script_path" ]]; then
+    script_path=$0
+else
+    # Is it a (relative) symlink? Change to its parent directory.
+    cd -- "$(dirname -- "$0")"
+fi
+
+plugin_root_dir=$(dirname -- "$(dirname -- "$script_path")")
+enabled_file="${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 -q -s "$RBENV_ROOT")"
 
 case "$1" in
-
     on)
-        rm -f -- "${plugin_root_dir}/share/rbenv/bundler/disabled"
+        mkdir -p -- "${plugin_root_dir}/share/rbenv/bundler"
+        touch -- "$enabled_file"
         ;;
 
     off)
-        mkdir -p -- "${plugin_root_dir}/share/rbenv/bundler"
-        touch -- "${plugin_root_dir}/share/rbenv/bundler/disabled"
+        rm -f -- "$enabled_file"
         ;;
 
     *)
@@ -37,4 +48,6 @@ case "$1" in
         ;;
 esac
 
-rbenv rehash
+cd -- "$current_dir"
+
+rbenv-rehash

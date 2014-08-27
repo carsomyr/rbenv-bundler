@@ -16,7 +16,7 @@
 
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 
-if [[ -n "$plugin_disabled" ]]; then
+if [[ -z "$plugin_enabled" ]]; then
     return -- 0
 fi
 
