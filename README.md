@@ -7,20 +7,20 @@ to report Bundler-installed gem executables if available.
 
 ### Installation
 
-1. Get [rbenv](https://github.com/sstephenson/rbenv) working. Read the
+1. Get [rbenv](https://github.com/sstephenson/rbenv.git) working. Read the
    documentation thoroughly and be sure to set up your Bash environment
    correctly.
 
 2. Install the plugin.
 
-        $ git clone -- git://github.com/carsomyr/rbenv-bundler.git \
+        $ git clone -- https://github.com/carsomyr/rbenv-bundler.git \
           ~/.rbenv/plugins/bundler
 
-3. Make sure that there is a 1.8.7+ system or rbenv Ruby with the Bundler gem
+3. Make sure that there is a `1.8.7`+ system or rbenv Ruby with the Bundler gem
    installed, available for the plugin's use.
 
         $ ruby -r bundler -e "puts RUBY_VERSION"
-          2.1.1
+          2.1.2
 
 ### Usage
 
@@ -29,8 +29,8 @@ to report Bundler-installed gem executables if available.
    it inside Bundler-controlled project directories with local, rbenv-installed
    Ruby versions set.
 
-        $ # Suppose the project uses Ruby version 2.1.1.
-        $ rbenv local 2.1.1
+        $ # Suppose the project uses Ruby version `2.1.2`.
+        $ rbenv local 2.1.2
 
         $ # Install the version-specific Bundler gem.
         $ gem install bundler
@@ -43,24 +43,22 @@ to report Bundler-installed gem executables if available.
 
         $ # If "rake" is a Bundler-installed gem executable, report its location
         $ # with "rbenv which". The result should look like
-        $ # "${PWD}/vendor/local/ruby/1.9.1/bin/rake"
+        $ # "${PWD}/vendor/local/ruby/2.1.0/bin/rake"
         $ rbenv which rake
 
         $ # Run "rake" without having to type "bundle exec rake".
         $ rake
 
-2. If you wish to disable the plugin, type `rbenv bundler off`. Type `rbenv
-   bundler on` to enable.
-
-3. **Note**: As of version 0.96, you will no longer need to type `rbenv rehash`
-   after `bundle install` or `bundle update`, as the plugin will automagically
-   rehash for you. Still, it's good practice to not rely on magic and type
-   `rbenv rehash` upon installation of gems with executables.
+2. **Important**: The plugin is opt-in. If you wish to enable it, type `rbenv
+   bundler on`. Type `rbenv bundler off` to disable.
 
 ### Version History
 
-**0.98** (tentative)
+**0.98** (Aug 28, 2014)
 
+* Change the plugin's on/off behavior to be opt-in instead of opt-out.
+  Additionally, it keeps track of on/off state _per rbenv installation_ (not as
+  if the vast majority of users would need this kind of isolation).
 * Fix issue [\#42](https://github.com/carsomyr/rbenv-bundler/issues/42), where
   Bundler would behave differently when a given gem's internal `bin` directory,
   as opposed to the rbenv Ruby's `bin` directory, is prepended onto the `PATH`
