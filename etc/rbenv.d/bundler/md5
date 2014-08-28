@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if type md5 >/dev/null 2>&1; then
+  md5 -q -s "$1"
+else
+  echo -n "$1" | md5sum | cut -f1 -d " "
+fi
