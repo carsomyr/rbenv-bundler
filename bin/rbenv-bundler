@@ -30,7 +30,8 @@ else
 fi
 
 plugin_root_dir=$(dirname -- "$(dirname -- "$script_path")")
-enabled_file="${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 -q -s "$RBENV_ROOT")"
+md5="${plugin_root_dir}/etc/rbenv.d/bundler/md5"
+enabled_file="${plugin_root_dir}/share/rbenv/bundler/enabled_$($md5 "$RBENV_ROOT")"
 
 case "$1" in
     on)
