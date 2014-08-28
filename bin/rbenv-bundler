@@ -29,8 +29,9 @@ else
     cd -- "$(dirname -- "$0")"
 fi
 
-plugin_root_dir=$(dirname -- "$(dirname -- "$script_path")")
-enabled_file="${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 -q -s "$RBENV_ROOT")"
+source -- "$(dirname -- "$(dirname -- "$script_path")")/etc/rbenv.d/bundler/includes.sh"
+
+enabled_file="${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 "$RBENV_ROOT")"
 
 case "$1" in
     on)

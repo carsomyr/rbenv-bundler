@@ -148,11 +148,32 @@ function make_gemfile_shims {
     return -- 0
 }
 
+# Computes MD5 hashes in a cross-platform way.
+function md5 {
+    case "$(uname)" in
+        Linux)
+            local -- result=$(echo "$1" | md5sum)
+            echo "${result:0:32}"
+            return -- $?
+            ;;
+
+        Darwin)
+            echo "$1" | command -- md5
+            return -- $?
+            ;;
+
+        *)
+            echo "Unsupported operating system" >&2
+            return -- 127
+            ;;
+    esac
+}
+
 # The plugins root directory.
 plugin_root_dir=$(dirname -- "$(dirname -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")")")
 
 # Whether the plugin is disabled.
-if [[ -f "${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 -q -s "$RBENV_ROOT")" ]]; then
+if [[ -f "${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 "$RBENV_ROOT")" ]]; then
     plugin_enabled="1"
 else
     plugin_enabled=""
