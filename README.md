@@ -1,9 +1,9 @@
 # rbenv-bundler: A Bundler Plugin for rbenv
 
 This plugin transparently makes rbenv's shims aware of bundle installation
-paths. It saves you from the hassle of having to type `bundle exec ${command}`
-when working with per-project gemsets and will enable `rbenv which ${command}`
-to report Bundler-installed gem executables if available.
+paths. It saves you from the hassle of having to type `bundle exec` when working
+with per-project gemsets and will enable `rbenv which` to report
+Bundler-installed gem executables if available.
 
 ### Installation
 
@@ -153,7 +153,7 @@ to report Bundler-installed gem executables if available.
 
 ### License
 
-    Copyright 2012 Roy Liu
+    Copyright 2012-2014 Roy Liu
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not
     use this file except in compliance with the License. You may obtain a copy
