@@ -157,7 +157,7 @@ function md5 {
             return -- $?
             ;;
 
-        Darwin)
+        Darwin|FreeBSD)
             echo "$1" | command -- md5
             return -- $?
             ;;
