@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# The rbenv-bundler plugin delegate for "rbenv which".
+# The plugin delegate for `rbenv which`.
 
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 

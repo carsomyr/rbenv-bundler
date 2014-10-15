@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# The rbenv-bundler plugin delegate for "rbenv exec".
+# The plugin delegate for `rbenv exec`.
 
 source -- "$(dirname -- "$(dirname -- "${BASH_SOURCE[0]}")")/bundler/includes.sh"
 
@@ -23,10 +23,8 @@ fi
 manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
 
 if { ! bundled_executable=$(find_bundled_executable "$manifest_dir"); } then
-
-    # Use the internally provided script on "bundle install" or "bundle update" to automagically rehash afterwards.
+    # Use the internally provided script on `bundle install` or `bundle update` to automagically rehash afterwards.
     if [[ "$RBENV_COMMAND" == "bundle" ]] && { [[ "$2" == "install" ]] || [[ "$2" == "update" ]]; } then
-
         RBENV_BIN_PATH="${plugin_root_dir}/etc/rbenv.d/bundler"
         RBENV_COMMAND_PATH="${RBENV_BIN_PATH}/bundler"
     fi
@@ -34,7 +32,7 @@ if { ! bundled_executable=$(find_bundled_executable "$manifest_dir"); } then
     return -- 0
 fi
 
-# Instead of running "$RBENV_COMMAND", run "bundle exec ${RBENV_COMMAND}" instead.
+# Run `bundle exec ${RBENV_COMMAND}` instead of `$RBENV_COMMAND`.
 
 RBENV_COMMAND="bundle"
 RBENV_COMMAND_PATH=$(rbenv-which "$RBENV_COMMAND")

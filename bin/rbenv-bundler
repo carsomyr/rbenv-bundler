@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# A script for enabling/disabling the rbenv-bundler plugin.
+# A script for enabling/disabling the plugin.
 
 set -e
 

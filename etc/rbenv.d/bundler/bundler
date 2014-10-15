@@ -14,6 +14,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+# A stub for running `bundle install` or `bundle update` and then rehashing to discover bundled executables.
+
 "$(rbenv-which bundle)" "$@"
 
 rbenv-rehash
