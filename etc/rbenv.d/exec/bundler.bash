@@ -22,7 +22,7 @@ fi
 
 manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
 
-if { ! bundled_executable=$(find_bundled_executable "$manifest_dir"); } then
+if { ! bundled_executable=$(find_bundled_executable "$manifest_dir"); }; then
     # Use the internally provided script on `bundle install` or `bundle update` to automagically rehash afterwards.
     if [[ "$RBENV_COMMAND" == "bundle" ]] && { [[ "$2" == "install" ]] || [[ "$2" == "update" ]]; } then
         RBENV_BIN_PATH="${plugin_root_dir}/etc/rbenv.d/bundler"

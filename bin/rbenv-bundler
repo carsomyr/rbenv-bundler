@@ -33,20 +33,41 @@ source -- "$(dirname -- "$(dirname -- "$script_path")")/etc/rbenv.d/bundler/incl
 
 enabled_file="${plugin_root_dir}/share/rbenv/bundler/enabled_$(md5 "$RBENV_ROOT")"
 
+# Magic comment to enable completions:
+#
+# provide rbenv completions
+
 case "$1" in
     on)
         mkdir -p -- "${plugin_root_dir}/share/rbenv/bundler"
         touch -- "$enabled_file"
+
+        rbenv-rehash
         ;;
 
     off)
         rm -f -- "$enabled_file"
+
+        rbenv-rehash
+        ;;
+
+    --complete)
+        shift -- 1
+
+        case "$1" in
+            "")
+                cat <<EOF
+on
+off
+EOF
+                ;;
+        esac
         ;;
 
     *)
-        echo "usage: rbenv bundler [on | off]" >&2
+        cat >&2 <<EOF
+usage: rbenv bundler [on | off]
+EOF
         exit -- 1
         ;;
 esac
-
-rbenv-rehash

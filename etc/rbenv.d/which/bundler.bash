@@ -22,7 +22,7 @@ fi
 
 manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
 
-if { ! bundled_executable=$(find_bundled_executable "$manifest_dir"); } then
+if { ! bundled_executable=$(find_bundled_executable "$manifest_dir"); }; then
     return -- 0
 fi
 

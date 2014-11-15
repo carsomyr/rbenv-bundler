@@ -23,7 +23,7 @@ fi
 manifest_dir="${plugin_root_dir}/share/rbenv/bundler"
 rehash_script="${plugin_root_dir}/etc/rbenv.d/bundler/rehash.rb"
 
-if { needs_rehash_script "$manifest_dir"; } then
+if { needs_rehash_script "$manifest_dir"; }; then
     "$rehash_script" --refresh --verbose --out-dir "$manifest_dir" -- "$PWD" || true
 fi
 
