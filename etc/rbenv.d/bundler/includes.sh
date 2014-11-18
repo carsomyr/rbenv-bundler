@@ -38,8 +38,18 @@ function find_bundled_executable {
     for (( i = 0; i < ${#manifest_entries[@]}; i += 2 )); do
         project_dir=$(dirname -- "${manifest_entries[$i]}")
 
+        if [[ "$project_dir" != "/" ]]; then
+            project_dir="${project_dir}/"
+        fi
+
+        current_dir=$PWD
+
+        if [[ "$current_dir" != "/" ]]; then
+            current_dir="${current_dir}/"
+        fi
+
         # Check if the manifest directory is a prefix of the current directory.
-        if [[ "$project_dir" != "${PWD:0:${#project_dir}}" ]]; then
+        if [[ "$current_dir" == "${current_dir##$project_dir}" ]]; then
             continue
         fi
 
