@@ -28,37 +28,37 @@ Bundler-installed gem executables if available.
         $ ruby -r bundler -e "puts RUBY_VERSION"
           2.1.4
 
+4.  **Important**: The plugin is opt-in. To enable it, type `rbenv
+    bundler on`. Type `rbenv bundler off` to disable.
+
 ### Usage
 
-1.  Just as you would run `rbenv rehash` upon installation of a new Ruby
-    distribution or a gem with associated executable, you will also need to run
-    it inside Bundler-controlled project directories with local, rbenv-installed
-    Ruby versions set.
+Just as you would run `rbenv rehash` upon installation of a new Ruby
+distribution or a gem with associated executable, you will also need to run
+it inside Bundler-controlled project directories with local, rbenv-installed
+Ruby versions set.
 
-        $ # Suppose the project uses Ruby version `2.1.4`.
-        $ rbenv local 2.1.4
+    $ # Suppose the project uses Ruby version `2.1.4`.
+    $ rbenv local 2.1.4
 
-        $ # Install the version-specific Bundler gem.
-        $ gem install bundler
+    $ # Install the version-specific Bundler gem.
+    $ gem install bundler
 
-        $ # Suppose you already have a Gemfile.
-        $ bundle install
+    $ # Suppose you already have a Gemfile.
+    $ bundle install
 
-        $ # The plugin will automagically rehash for you on `bundle install` or
-        $ # `bundle update`, so this step isn't necessary.
-        $ # rbenv rehash
+    $ # The plugin will automagically rehash for you on `bundle install` or
+    $ # `bundle update`, so this step isn't necessary.
+    $ # rbenv rehash
 
-        $ # If `rake` is a Bundler-installed gem executable, report its location
-        $ # with `rbenv which`. The result should look like
-        $ # `${RBENV_ROOT}/versions/2.1.4/lib/ruby/gems/2.1.0/gems/rake-10.3.2
-        $ # /bin/rake` instead of `${RBENV_ROOT}/versions/2.1.4/bin/rake`.
-        $ rbenv which rake
+    $ # If `rake` is a Bundler-installed gem executable, report its location
+    $ # with `rbenv which`. The result should look like
+    $ # `${RBENV_ROOT}/versions/2.1.4/lib/ruby/gems/2.1.0/gems/rake-10.3.2
+    $ # /bin/rake` instead of `${RBENV_ROOT}/versions/2.1.4/bin/rake`.
+    $ rbenv which rake
 
-        $ # Run `rake` without having to type `bundle exec rake`.
-        $ rake
-
-2.  **Important**: The plugin is opt-in. If you wish to enable it, type `rbenv
-    bundler on`. Type `rbenv bundler off` to disable.
+    $ # Run `rake` without having to type `bundle exec rake`.
+    $ rake
 
 ### Version History
 
