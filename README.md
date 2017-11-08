@@ -63,6 +63,10 @@ Bundler-installed gem executables if available.
 
 ### Version History
 
+**1.00** (Nov 8, 2017)
+
+*   Fix the `Bundler` monkey patch for Bundler version 1.16 and later.
+
 **0.99** (Oct 27, 2014)
 
 *   Compute MD5 hashes in a cross-platform way to support Mac OS X, Linux, and
