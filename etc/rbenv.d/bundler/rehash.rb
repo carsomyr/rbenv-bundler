@@ -377,7 +377,14 @@ module RbenvBundler
       end
 
       def self.bundle_path
-        Pathname.new(settings.path).expand_path(root)
+        path = settings.path
+
+        # Special handling for Bundler version 1.16 and later.
+        if defined?(Bundler::Settings::Path) && path.instance_of?(Bundler::Settings::Path)
+          path = path.path
+        end
+
+        Pathname.new(path).expand_path(root)
       end
 
       def self.settings
