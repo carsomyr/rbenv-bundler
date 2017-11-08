@@ -30,7 +30,10 @@ Bundler-installed gem executables if available.
 
 ### Usage
 
-1.  Just as you would run `rbenv rehash` upon installation of a new Ruby
+1.  **Important**: The plugin is opt-in. If you wish to enable it, type `rbenv
+    bundler on`. Type `rbenv bundler off` to disable.
+
+2.  Just as you would run `rbenv rehash` upon installation of a new Ruby
     distribution or a gem with associated executable, you will also need to run
     it inside Bundler-controlled project directories with local, rbenv-installed
     Ruby versions set.
@@ -57,8 +60,6 @@ Bundler-installed gem executables if available.
         $ # Run `rake` without having to type `bundle exec rake`.
         $ rake
 
-2.  **Important**: The plugin is opt-in. If you wish to enable it, type `rbenv
-    bundler on`. Type `rbenv bundler off` to disable.
 
 ### Version History
 
