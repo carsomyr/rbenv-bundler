@@ -63,6 +63,10 @@ Bundler-installed gem executables if available.
 
 ### Version History
 
+**1.0.1** (Jul 1, 2021)
+
+*   Fix an issue with platform gems not being found in the `Gemfile.lock`.
+
 **1.00** (Nov 8, 2017)
 
 *   Fix the `Bundler` monkey patch for Bundler version 1.16 and later.
