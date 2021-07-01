@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012 Roy Liu
+# Copyright 2012-2021 Roy Liu
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -89,10 +89,7 @@ module RbenvBundler
         .join(File::PATH_SEPARATOR)
     end
 
-    Bundler.rubygems.clear_paths
-
-    runtime = Bundler::Runtime.new(bundler_gemfile.parent,
-                                   Bundler::Definition.build(bundler_gemfile, bundler_lockfile, nil))
+    Bundler.reset!
 
     begin
       # We need to fork here: Bundler may load .gemspec files that irreversibly modify the Ruby state.
@@ -112,8 +109,9 @@ module RbenvBundler
         child_in.close
 
         begin
-          YAML.dump(runtime.specs.map { |gemspec| OpenStruct.new(:bin_dir => gemspec.bin_dir,
-                                                                 :executables => gemspec.executables) }, child_out)
+          YAML.dump(Bundler.definition.specs.map do |gemspec|
+            OpenStruct.new(:bin_dir => gemspec.bin_dir, :executables => gemspec.executables)
+          end, child_out)
 
           success = true
         rescue Bundler::GemNotFound, Bundler::GitError => e
@@ -131,7 +129,7 @@ module RbenvBundler
       # Restore old environment variables for later reuse.
       ENV.update(env_old)
 
-      Bundler.rubygems.clear_paths
+      Bundler.reset!
     end
   end
 
@@ -414,12 +412,12 @@ module RbenvBundler
         gem_ruby_engine = Bundler.ruby_profile.gem_ruby_engine
 
         case gem_ruby_engine
-          when "ruby", "rbx"
-            original_local
-          when "jruby"
-            Gem::Platform::JAVA
-          else
-            raise "Unknown gem Ruby engine #{gem_ruby_engine.dump}"
+        when "ruby", "rbx"
+          original_local
+        when "jruby"
+          Gem::Platform::JAVA
+        else
+          raise "Unknown gem Ruby engine #{gem_ruby_engine.dump}"
         end
       end
     end
