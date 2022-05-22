@@ -99,7 +99,7 @@ module RbenvBundler
 
       if !pid.nil?
         child_out.close
-        gemspecs = YAML.load(child_in) || []
+        gemspecs = YAML.load(child_in, permitted_classes: [OpenStruct]) || []
         child_in.close
 
         _, status = Process.waitpid2(pid)
