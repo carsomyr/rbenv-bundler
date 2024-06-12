@@ -262,7 +262,7 @@ module RbenvBundler
 
     if ruby_profiles_file.file?
       ruby_profile_map = ruby_profiles_file.open("rb") do |f|
-        YAML.load(f)
+        YAML.load(f, permitted_classes: [OpenStruct, Pathname])
       end
     else
       ruby_profile_map = {}
